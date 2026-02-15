@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Český vtip dne</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .widget-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .widget-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #11998e, #38ef7d);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 32px;
+            margin-bottom: 5px;
+            font-weight: 700;
+        }
+
+        .header .emoji {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        .joke-container {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 15px;
+            padding: 25px;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .joke-text {
+            font-size: 20px;
+            line-height: 1.6;
+            color: #2d3748;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .footer {
+            text-align: center;
+            color: #718096;
+            font-size: 14px;
+        }
+
+        .new-joke-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 15px 0;
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-weight: 600;
+        }
+
+        .new-joke-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .new-joke-btn:active {
+            transform: translateY(0);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .joke-text {
+            animation: fadeIn 0.5s ease-in;
+        }
+    </style>
+</head>
+<body>
+    <div class="widget-container">
+        <div class="header">
+            <div class="emoji">😂</div>
+            <h1>Český vtip dne</h1>
+        </div>
+        
+        <div class="joke-container">
+            <p class="joke-text" id="joke"></p>
+        </div>
+
+        <button class="new-joke-btn" onclick="loadNewJoke()">🎲 Nový vtip</button>
+        
+        <div class="footer">
+            <p>Pro Braiins DECK 🚀</p>
+        </div>
+    </div>
+
+    <script>
+        const jokes = [
+            "Přijde Pepíček domů ze školy a říká: \"Mami, mami, dneska jsem ve škole vyskočil 2 metry vysoko!\" \"To je výborný, Pepíčku!\" \"Jo, ale pan učitel říkal, že to bylo kvůli tomu šroubu v židli...\"",
+            
+            "Dva kamarádi si povídají: \"Slyšel jsem, že tvoje žena začala s jógou.\" \"Jo, už dokáže sedět v lotosové pozici dvě hodiny.\" \"Páni, to je úžasný!\" \"No, hlavně když sedí na pohovce a kouká na seriály.\"",
+            
+            "Přijde chlap do hospody a říká: \"Pivo a klobásu!\" Hostinský říká: \"Omlouvám se, ale klobásy došly.\" Chlap: \"Dobře, tak tedy dvě piva.\"",
+            
+            "Manželka se ptá manžela: \"Miláčku, co bys dělal, kdybych umřela?\" \"Asi bych se zbláznil.\" \"Ááá, to je milé!\" \"Jo, ale určitě bych si zvykl.\"",
+            
+            "Učitel se ptá Pepíčka: \"Pepíčku, kolik je 2+2?\" Pepíček: \"4\" Učitel: \"Výborně! A kolik je 4+4?\" Pepíček: \"To záleží na tom, jestli se ptáte na matematiku nebo na život.\"",
+            
+            "Přijde muž k lékaři: \"Pane doktore, mám pocit, že jsem neviditelný.\" Doktor: \"Promiňte, ale na dnešek nemám nikoho objednaného.\"",
+            
+            "Policista zastaví auto: \"Víte, jakou rychlostí jste jel?\" \"Ne, ale vím, kde jsem.\" Policista: \"A to mi má pomoct?\" \"No, Heisenberg říkal, že obojí současně vědět nemůžete.\"",
+            
+            "Ptá se syn táty: \"Tati, proč máš tolik šedivých vlasů?\" \"To proto, že jsi zlobil.\" \"Aha, tak proto je děda úplně bílý!\"",
+            
+            "Přijde chlap na pohotovost s vidličkou v zádech. Doktor: \"Kdo vám to udělal?\" \"Manželka.\" \"A co jste jí udělal?\" \"Řekl jsem jí, že vaří stejně dobře jako moje máma.\"",
+            
+            "Učitel matematiky vstoupí domů a žena říká: \"Máme problém. Tvoje dcera přišla domů hodinu po půlnoci!\" Matematik: \"Tak moment... jedna plus nula dohromady... to je fakt problém!\"",
+            
+            "Volá manželka manželovi: \"Miláčku, přinesl bys domů pivo?\" \"Kolik?\" \"Šest.\" \"Šest čeho?\" \"Šest? To zní jako rozumné množství.\"",
+            
+            "Babička s vnukem koukají na televizi. Vnuk: \"Babi, proč se ten hokejista zlobí?\" Babička: \"Protože ho ostatní nechtějí pustit k tomu koláčku.\"",
+            
+            "Programátor jde spát. Žena říká: \"Zhasni světlo a zavři okno.\" Programátor: \"Něco ti nevychází - to jsou dvě různé podmínky.\"",
+            
+            "Setkají se dva kamarádi: \"Slyšel jsem, že tvůj bratr dostal práci v observatoři.\" \"Jo, sleduje hvězdy.\" \"To musí být romantické.\" \"No, spíš nudné. Sleduje Jennifer Lopez na Instagramu.\"",
+            
+            "Kontrolor v tramvaji: \"Lístek prosím!\" Cestující: \"Nemám, šel jsem pěšky.\" \"Ale jste přece v tramvaji!\" \"Jo, ale to jsem neplánoval.\"",
+            
+            "Přítel kamarádovi: \"Proč máš takový smutný obličej?\" \"Manželka mi řekla, ať už s ní nikdy nemluvím.\" \"A to tě mrzí?\" \"Ne, ale už je to týden a začínám si zvykat.\"",
+            
+            "Učitel: \"Děti, dnes si řekneme něco o Slunce.\" Pepíček: \"Ale pane učiteli, to přece nemá smysl, ve dne ho nevidíme a v noci je pryč!\"",
+            
+            "Ptá se host v restauraci: \"Pane vrchní, v téhle polévce plavou mouchy!\" Vrchní: \"Omlouvám se, řekl jste kuřecí nebo hrachovou?\"",
+            
+            "Dva kamarádi: \"Hele, můj pes umí počítat.\" \"Vážně?\" \"Jo, včera jsem mu dal dvě kosti a dnes ho našel, jak hledá třetí.\"",
+            
+            "Manželka manželovi: \"Miláčku, koupila jsem si nové šaty za 5000.\" \"Za kolik?!\" \"Za pět tisíc.\" \"To je drahý!\" \"Ale byly v akci, původně stály 20 tisíc!\" \"Proboha, při těchto slevách nás to zruinuje!\""
+        ];
+
+        function loadNewJoke() {
+            const jokeElement = document.getElementById('joke');
+            const randomIndex = Math.floor(Math.random() * jokes.length);
+            
+            // Remove animation
+            jokeElement.style.animation = 'none';
+            
+            // Force reflow
+            void jokeElement.offsetWidth;
+            
+            // Add animation back
+            jokeElement.style.animation = 'fadeIn 0.5s ease-in';
+            
+            jokeElement.textContent = jokes[randomIndex];
+        }
+
+        // Load initial joke
+        loadNewJoke();
+
+        // Auto-refresh joke every 2 minutes for Braiins DECK
+        setInterval(loadNewJoke, 120000);
+    </script>
+</body>
+</html>
