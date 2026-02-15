@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Sluneční soustava">
+    <meta name="theme-color" content="#000814">
+    <meta name="description" content="Interaktivní model sluneční soustavy">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><circle cx='90' cy='90' r='80' fill='%23ffff00'/></svg>">
+    <link rel="manifest" href="data:application/json,%7B%22name%22:%22Sluneční%20soustava%22,%22short_name%22:%22SS%22,%22start_url%22:%22./mobile_solar_system.html%22,%22display%22:%22fullscreen%22,%22background_color%22:%22%23000814%22,%22theme_color%22:%22%23000814%22,%22orientation%22:%22portrait-primary%22,%22scope%22:%22./"%7D">
+    <title>Sluneční soustava</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { width: 100%; height: 100%; background: #000814; overflow: hidden; user-select: none; font-family: Arial; }
+        canvas { display: block; width: 100%; height: 100vh; background: #000814; touch-action: none; }
+        .detail { position: fixed; bottom: 15px; left: 15px; right: 15px; background: rgba(0,8,20,0.96); border: 2px solid #ffdd66; padding: 15px; border-radius: 6px; color: #ccc; z-index: 20; display: none; max-height: 200px; overflow-y: auto; }
+        .detail.show { display: block; animation: slideUp 0.3s ease-in-out; }
+        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .detail h2 { color: #ffdd66; margin-bottom: 12px; font-size: 16px; border-bottom: 1px solid #666; padding-bottom: 8px; }
+        .detail p { font-size: 12px; margin-bottom: 6px; color: #bbb; line-height: 1.4; }
+        .install-btn { position: fixed; top: 15px; right: 15px; background: rgba(100,150,255,0.8); border: 1px solid #4da6ff; color: #fff; padding: 10px 16px; border-radius: 20px; font-size: 12px; font-weight: bold; cursor: pointer; z-index: 100; display: none; }
+        .install-btn.show { display: block; animation: slideDown 0.3s ease-in-out; }
+        @keyframes slideDown { from { transform: translateY(-30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .install-btn:active { transform: scale(0.95); background: rgba(100,150,255,1); }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <button class="install-btn" id="installBtn" onclick="installApp()">📱 Nainstaluj aplikaci</button>
+    <div class="detail" id="detail"></div>
+
+    <script>
+        // Instalace aplikace
+        let deferredPrompt;
+        const installBtn = document.getElementById('installBtn');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installBtn.classList.add('show');
+        });
+
+        window.addEventListener('appinstalled', () => {
+            installBtn.classList.remove('show');
+        });
+
+        function installApp() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then(() => {
+                    deferredPrompt = null;
+                    installBtn.classList.remove('show');
+                });
+            }
+        }
+
+        // Service Worker
+        if ('serviceWorker' in navigator) {
+            const swCode = `
+                self.addEventListener('install', e => {
+                    e.waitUntil(caches.open('solar-v1').then(cache => {
+                        return cache.addAll(['/']);
+                    }).catch(() => self.skipWaiting()));
+                });
+                self.addEventListener('activate', e => e.waitUntil(clients.claim()));
+                self.addEventListener('fetch', e => {
+                    e.respondWith(caches.match(e.request).then(r => r || fetch(e.request)).catch(() => caches.match('/')));
+                });
+            `;
+            const blob = new Blob([swCode], { type: 'application/javascript' });
+            const swUrl = URL.createObjectURL(blob);
+            navigator.serviceWorker.register(swUrl).catch(() => {});
+        }
+
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const detailDiv = document.getElementById('detail');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        let scale = Math.min(canvas.width, canvas.height) / 300;
+        let baseScale = scale;
+        let offsetX = 0, offsetY = 0, time = 0;
+        let touchStartX = 0, touchStartY = 0, isDragging = false, lastTouchDistance = 0;
+
+        const sun = { name: 'Slunce', type: 'Hvězda', diameter: '1,391,000 km', temp: '5,505°C', mass: '1.989 × 10³⁰ kg', age: '4.6 miliard let' };
+
+        const planets = [
+            { name: 'Merkur', dist: 95, size: 8, color: '#8c7853', speed: 4.1, angle: 0, diameter: '3,839 km', type: 'Kamenná', temp: '-173°C až 427°C', moons: 0, moonsList: '', distance: '57.9M km' },
+            { name: 'Venuše', dist: 143, size: 12, color: '#ffc649', speed: 1.6, angle: 45, diameter: '12,104 km', type: 'Kamenná', temp: '464°C', moons: 0, moonsList: '', distance: '108.2M km' },
+            { name: 'Země', dist: 190, size: 12, color: '#4da6ff', speed: 1.0, angle: 90, diameter: '12,742 km', type: 'Kamenná', temp: '15°C', moons: 1, moonsList: 'Měsíc', distance: '149.6M km', moonData: [{ name: 'Měsíc', dist: 30, size: 1.5 }] },
+            { name: 'Mars', dist: 238, size: 9, color: '#ff6b4a', speed: 0.53, angle: 135, diameter: '6,779 km', type: 'Kamenná', temp: '-65°C', moons: 2, moonsList: 'Phobos, Deimos', distance: '227.9M km' },
+            { name: 'Jupiter', dist: 317, size: 22, color: '#c88b3a', speed: 0.084, angle: 180, diameter: '139,820 km', type: 'Plynný obr', temp: '-110°C', moons: 95, moonsList: 'Io, Europa, Ganymed, Callisto', distance: '778.5M km', moonData: [{ name: 'Io', dist: 35, size: 2 }, { name: 'Europa', dist: 50, size: 2 }] },
+            { name: 'Saturn', dist: 396, size: 20, color: '#f4d47f', speed: 0.034, angle: 225, diameter: '116,460 km', type: 'Plynný obr', temp: '-140°C', moons: 146, moonsList: 'Titan, Enceladus', distance: '1.43B km', ringSize: 3.5, moonData: [{ name: 'Titan', dist: 50, size: 2.5 }] },
+            { name: 'Uran', dist: 443, size: 16, color: '#4fd0e7', speed: 0.012, angle: 270, diameter: '50,724 km', type: 'Ledový obr', temp: '-195°C', moons: 27, moonsList: 'Titania, Oberon', distance: '2.87B km' },
+            { name: 'Neptun', dist: 475, size: 20, color: '#4169ff', speed: 0.01, angle: 315, diameter: '49,244 km', type: 'Ledový obr', temp: '-200°C', moons: 14, moonsList: 'Triton', distance: '4.50B km' },
+            { name: 'Pluto', dist: 530, size: 5, color: '#d4a574', speed: 0.004, angle: 60, diameter: '2,377 km', type: 'Trpasličí', temp: '-223°C', moons: 5, moonsList: 'Charon', distance: '5.91B km', moonData: [{ name: 'Charon', dist: 20, size: 1.2 }] }
+        ];
+
+        function getTouchDistance(e) {
+            if (e.touches.length < 2) return 0;
+            const dx = e.touches[0].clientX - e.touches[1].clientX;
+            const dy = e.touches[0].clientY - e.touches[1].clientY;
+            return Math.sqrt(dx * dx + dy * dy);
+        }
+
+        canvas.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 2) {
+                lastTouchDistance = getTouchDistance(e);
+                isDragging = false;
+            } else {
+                touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
+                isDragging = false;
+            }
+        }, false);
+
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            if (e.touches.length === 2) {
+                const currentDistance = getTouchDistance(e);
+                const delta = currentDistance - lastTouchDistance;
+                scale = Math.max(baseScale * 0.5, Math.min(baseScale * 3, scale * (1 + delta * 0.003)));
+                lastTouchDistance = currentDistance;
+                return;
+            }
+            const dx = e.touches[0].clientX - touchStartX;
+            const dy = e.touches[0].clientY - touchStartY;
+            if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+                isDragging = true;
+                offsetX += dx;
+                offsetY += dy;
+                touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
+            }
+        }, false);
+
+        canvas.addEventListener('touchend', (e) => {
+            if (!isDragging && e.touches.length === 0) {
+                const rect = canvas.getBoundingClientRect();
+                const clickX = touchStartX - rect.left;
+                const clickY = touchStartY - rect.top;
+                const cx = canvas.width / 2;
+                const cy = canvas.height / 2;
+
+                const sunX = cx + offsetX;
+                const sunY = cy + offsetY;
+                const sunDist = Math.hypot(clickX - sunX, clickY - sunY);
+                if (sunDist < 50 * scale) {
+                    detailDiv.innerHTML = `<h2>☀️ ${sun.name}</h2><p><strong>Typ:</strong> ${sun.type}</p><p><strong>Průměr:</strong> ${sun.diameter}</p><p><strong>Teplota:</strong> ${sun.temp}</p><p><strong>Hmotnost:</strong> ${sun.mass}</p><p><strong>Věk:</strong> ${sun.age}</p>`;
+                    detailDiv.classList.add('show');
+                    setTimeout(() => detailDiv.classList.remove('show'), 10000);
+                    return;
+                }
+
+                for (let p of planets) {
+                    const angle = p.angle * Math.PI / 180 + (time * p.speed * Math.PI / 180);
+                    const px = cx + offsetX + p.dist * scale * Math.cos(angle);
+                    const py = cy + offsetY + p.dist * scale * Math.sin(angle);
+                    const dist = Math.hypot(clickX - px, clickY - py);
+                    if (dist < 35) {
+                        detailDiv.innerHTML = `<h2>${p.name}</h2><p><strong>Typ:</strong> ${p.type} planeta</p><p><strong>Průměr:</strong> ${p.diameter}</p><p><strong>Vzdálenost:</strong> ${p.distance}</p><p><strong>Teplota:</strong> ${p.temp}</p><p><strong>Měsíce (${p.moons}):</strong> ${p.moonsList || 'Žádné'}</p>`;
+                        detailDiv.classList.add('show');
+                        setTimeout(() => detailDiv.classList.remove('show'), 10000);
+                        return;
+                    }
+                }
+            }
+        }, false);
+
+        function draw() {
+            ctx.fillStyle = '#000814';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const cx = canvas.width / 2;
+            const cy = canvas.height / 2;
+
+            // Orbity
+            planets.forEach(p => {
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+                ctx.lineWidth = 0.5;
+                ctx.beginPath();
+                ctx.arc(cx + offsetX, cy + offsetY, p.dist * scale, 0, Math.PI * 2);
+                ctx.stroke();
+            });
+
+            // Asteroid belt
+            const beltInnerRadius = 260 * scale;
+            const beltOuterRadius = 305 * scale;
+            for (let i = 0; i < 80; i++) {
+                const angle = (i / 80) * Math.PI * 2 + time * 0.01;
+                const randomRadius = Math.random() * (beltOuterRadius - beltInnerRadius) + beltInnerRadius;
+                const asteroidX = cx + offsetX + randomRadius * Math.cos(angle);
+                const asteroidY = cy + offsetY + randomRadius * Math.sin(angle);
+                ctx.fillStyle = `rgba(150, 120, 100, ${0.4 + Math.random() * 0.3})`;
+                ctx.beginPath();
+                ctx.arc(asteroidX, asteroidY, Math.random() * 1.2 + 0.4, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // Slunce
+            let sunSize = 40 * scale;
+            ctx.fillStyle = '#ffff00';
+            ctx.beginPath();
+            ctx.arc(cx + offsetX, cy + offsetY, sunSize, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = 'rgba(255, 255, 0, 0.2)';
+            ctx.beginPath();
+            ctx.arc(cx + offsetX, cy + offsetY, sunSize + 12, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#ffff00';
+            ctx.font = 'bold 10px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('☀️ Slunce', cx + offsetX, cy + offsetY + sunSize + 20);
+
+            // Planety
+            planets.forEach(p => {
+                const angle = p.angle * Math.PI / 180 + (time * p.speed * Math.PI / 180);
+                const x = cx + offsetX + p.dist * scale * Math.cos(angle);
+                const y = cy + offsetY + p.dist * scale * Math.sin(angle);
+
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(x, y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Saturn - prstence
+                if (p.name === 'Saturn') {
+                    for (let i = 0; i < 5; i++) {
+                        const ringRadius = p.size * (2 + i * 0.4);
+                        ctx.strokeStyle = `rgba(230, 200, 150, ${0.5 - i * 0.08})`;
+                        ctx.lineWidth = 2.5;
+                        ctx.beginPath();
+                        ctx.ellipse(x, y, ringRadius, ringRadius * 0.35, 0.3, 0, Math.PI * 2);
+                        ctx.stroke();
+                    }
+                }
+
+                // Měsíce
+                if (p.moonData) {
+                    p.moonData.forEach(moon => {
+                        const moonAngle = angle + moon.dist / 50;
+                        const mx = x + moon.dist * scale * Math.cos(moonAngle);
+                        const my = y + moon.dist * scale * Math.sin(moonAngle);
+                        ctx.fillStyle = 'rgba(200, 200, 200, 0.8)';
+                        ctx.beginPath();
+                        ctx.arc(mx, my, moon.size, 0, Math.PI * 2);
+                        ctx.fill();
+                    });
+                }
+
+                ctx.fillStyle = p.color;
+                ctx.font = 'bold 9px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(p.name, x, y - p.size - 10);
+            });
+
+            time += 0.1;
+            requestAnimationFrame(draw);
+        }
+
+        draw();
+    </script>
+</body>
+</html>
