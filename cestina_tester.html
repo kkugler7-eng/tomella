@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Český Jazyk - Interaktivní Tréninky</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 10px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 15px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        /* ===== INTRO SCREEN ===== */
+        .intro-screen {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .intro-screen h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        .test-list {
+            display: grid;
+            gap: 15px;
+            margin: 30px 0;
+        }
+
+        .test-btn {
+            padding: 15px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .test-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .test-info {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        /* ===== QUIZ SCREEN ===== */
+        .quiz-screen {
+            display: none;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #eee;
+            border-radius: 3px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s;
+        }
+
+        .score-display {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 10px;
+            background: #f5f5f5;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .score-display span {
+            color: #666;
+        }
+
+        .question-number {
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .question-container {
+            margin-bottom: 30px;
+        }
+
+        .question-header {
+            margin-bottom: 20px;
+        }
+
+        .question-text {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .points-badge {
+            display: inline-block;
+            background: #f0f0f0;
+            color: #667eea;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .question-context {
+            background: #f9f9f9;
+            padding: 12px;
+            border-left: 3px solid #667eea;
+            margin-bottom: 15px;
+            font-size: 14px;
+            color: #555;
+            border-radius: 4px;
+        }
+
+        /* ===== MULTIPLE CHOICE ===== */
+        .options-container {
+            display: grid;
+            gap: 10px;
+        }
+
+        .option {
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: white;
+            text-align: left;
+            font-size: 15px;
+        }
+
+        .option:hover {
+            border-color: #667eea;
+            background: #f5f7ff;
+        }
+
+        .option.selected {
+            border-color: #667eea;
+            background: #e8eaf6;
+        }
+
+        .option label {
+            display: block;
+            cursor: pointer;
+        }
+
+        .option input[type="radio"],
+        .option input[type="checkbox"] {
+            margin-right: 10px;
+            cursor: pointer;
+        }
+
+        /* ===== OPEN ANSWER ===== */
+        .open-answer-container {
+            display: flex;
+            gap: 10px;
+        }
+
+        .open-answer-input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 15px;
+            font-family: inherit;
+        }
+
+        .open-answer-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        /* ===== TRUE/FALSE ===== */
+        .true-false-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .tf-option {
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .tf-option:hover {
+            border-color: #667eea;
+        }
+
+        .tf-option.selected {
+            border-color: #667eea;
+            background: #e8eaf6;
+        }
+
+        .tf-option.true { color: #27ae60; }
+        .tf-option.false { color: #e74c3c; }
+
+        /* ===== MATCHING ===== */
+        .matching-container {
+            display: grid;
+            gap: 12px;
+        }
+
+        .match-pair {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .match-item {
+            padding: 12px;
+            background: #f5f5f5;
+            border-radius: 6px;
+            font-size: 14px;
+            border: 2px solid #ddd;
+        }
+
+        .match-select {
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .match-select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        /* ===== FEEDBACK ===== */
+        .feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 6px;
+            display: none;
+        }
+
+        .feedback.show {
+            display: block;
+        }
+
+        .feedback.correct {
+            background: #d4edda;
+            border: 2px solid #28a745;
+            color: #155724;
+        }
+
+        .feedback.incorrect {
+            background: #f8d7da;
+            border: 2px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .feedback-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 15px;
+        }
+
+        .feedback-content {
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .correct-answer {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid currentColor;
+            opacity: 0.9;
+        }
+
+        .explanation {
+            margin-top: 8px;
+            font-style: italic;
+            opacity: 0.95;
+        }
+
+        /* ===== BUTTONS ===== */
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-submit:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-next {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-next:hover {
+            background: #e0e0e0;
+        }
+
+        .btn-back {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .btn-back:hover {
+            background: #f5f7ff;
+        }
+
+        /* ===== RESULTS SCREEN ===== */
+        .results-screen {
+            display: none;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .results-screen.show {
+            display: block;
+        }
+
+        .final-score {
+            font-size: 48px;
+            color: #667eea;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        .results-stats {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-size: 16px;
+        }
+
+        .stats-row {
+            display: flex;
+            justify-content: space-around;
+            margin: 10px 0;
+        }
+
+        .stat-item {
+            flex: 1;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .stat-value.correct {
+            color: #27ae60;
+        }
+
+        .stat-value.incorrect {
+            color: #e74c3c;
+        }
+
+        .results-message {
+            font-size: 18px;
+            color: #333;
+            margin: 20px 0;
+        }
+
+        .btn-restart {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+
+        .btn-restart:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+
+            .header h1 {
+                font-size: 22px;
+            }
+
+            .question-text {
+                font-size: 15px;
+            }
+
+            .option, .tf-option, .match-item {
+                font-size: 14px;
+                padding: 10px;
+            }
+
+            .final-score {
+                font-size: 36px;
+            }
+
+            .stat-value {
+                font-size: 20px;
+            }
+
+            .match-pair {
+                grid-template-columns: 1fr;
+            }
+
+            .match-select {
+                width: 100%;
+            }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .section-title {
+            color: #667eea;
+            font-size: 12px;
+            text-transform: uppercase;
+            font-weight: bold;
+            margin-top: 15px;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 Český Jazyk - Tréninky</h1>
+            <p>Interaktivní příprava na přijímačky</p>
+        </div>
+
+        <!-- INTRO SCREEN -->
+        <div class="intro-screen" id="introScreen">
+            <h2>Vyber si test:</h2>
+            <div class="test-list" id="testList"></div>
+        </div>
+
+        <!-- QUIZ SCREEN -->
+        <div class="quiz-screen" id="quizScreen">
+            <button class="btn btn-back" onclick="goBack()">← Zpět na výběr</button>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+
+            <div class="score-display">
+                <span>Otázka <span class="question-number" id="currentQuestion">1</span> / <span id="totalQuestions">10</span></span>
+                <span>Body: <span id="currentScore">0</span> / <span id="maxScore">50</span></span>
+            </div>
+
+            <div class="question-container">
+                <div class="question-header">
+                    <div class="question-text" id="questionText"></div>
+                    <span class="points-badge" id="pointsBadge">1 bod</span>
+                </div>
+
+                <div id="questionContext"></div>
+                <div id="answerContainer"></div>
+
+                <div class="feedback" id="feedback"></div>
+
+                <div class="button-group">
+                    <button class="btn btn-submit" id="submitBtn" onclick="submitAnswer()">Odeslat odpověď</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- RESULTS SCREEN -->
+        <div class="results-screen" id="resultsScreen">
+            <h2>Test Completed! 🎉</h2>
+            <div class="final-score" id="finalScore">0 / 50</div>
+            
+            <div class="results-stats">
+                <div class="stats-row">
+                    <div class="stat-item">
+                        <div class="stat-label">Správné odpovědi</div>
+                        <div class="stat-value correct" id="correctCount">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Chybné odpovědi</div>
+                        <div class="stat-value incorrect" id="incorrectCount">0</div>
+                    </div>
+                </div>
+                <div class="stats-row">
+                    <div class="stat-item">
+                        <div class="stat-label">Úspěšnost</div>
+                        <div class="stat-value" id="successRate">0%</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="results-message" id="resultMessage"></div>
+            <button class="btn-restart" onclick="restartQuiz()">Začít znovu</button>
+        </div>
+    </div>
+
+    <script>
+        // ===== TEST DATA =====
+        const testData = {
+            'CJL9-TDPN-D09': {
+                name: 'Český Jazyk 9 - Diagnostický test',
+                description: 'Test č. 1 - Celý test',
+                questions: [
+                    {
+                        id: 1,
+                        type: 'multiple-choice',
+                        points: 1,
+                        text: 'Které z následujících tvrzení odpovídá TEXTU 1?',
+                        context: 'Text: Převez mě, příteli, na druhý břeh...',
+                        options: [
+                            { label: 'A) Autor textu slyšel v noci někoho zpívat.', value: 'A' },
+                            { label: 'B) Autor textu by se rád setkal s někým, kdo již zemřel.', value: 'B', correct: true },
+                            { label: 'C) Autor textu viděl nad vodou létat motýly.', value: 'C' },
+                            { label: 'D) Autor textu se rozhodl, že vystoupí z loďky a zůstane na druhém břehu.', value: 'D' }
+                        ],
+                        explanation: 'Správná odpověď je B. Z textu vyplývá, že autor chce vidět své zemřelé blízké ("Láska i smrt jsou jen okamžiky, polibky krásné Euridiky").'
+                    },
+                    {
+                        id: 2,
+                        type: 'multiple-choice',
+                        points: 1,
+                        text: 'Které z následujících tvrzení o dvou verších podtržených v TEXTU 1 je pravdivé?',
+                        options: [
+                            { label: 'A) Pouze v prvním verši se vyskytuje jak kontrast, tak i zvukosled.', value: 'A' },
+                            { label: 'B) V obou verších se vyskytuje jak kontrast, tak i zvukosled.', value: 'B', correct: true },
+                            { label: 'C) V prvním verši se vyskytuje kontrast a v druhém verši se vyskytuje zvukosled.', value: 'C' },
+                            { label: 'D) V prvním verši se vyskytuje zvukosled a v druhém verši se vyskytuje kontrast.', value: 'D' }
+                        ],
+                        explanation: 'V obou verších se vyskytují oba prvky - zvukosled (opakování hlásek) i kontrast.'
+                    },
+                    {
+                        id: 3,
+                        type: 'true-false',
+                        points: 1,
+                        text: 'Je alespoň některé z následujících tvrzení pravdivé?',
+                        context: 'Tvrzení č. 1: V první a v páté sloce se vyskytuje oslovení. Tvrzení č. 2: Poslední verš ve čtvrté, páté i šesté sloce je pětislabičný.',
+                        options: [
+                            { label: 'A) ano, ale pouze tvrzení č. 1', value: 'A', correct: true },
+                            { label: 'B) ano, ale pouze tvrzení č. 2', value: 'B' },
+                            { label: 'C) ano, každé z těchto tvrzení', value: 'C' },
+                            { label: 'D) ne, žádné z těchto tvrzení', value: 'D' }
+                        ],
+                        explanation: 'Tvrzení č. 1 je pravdivé - první sloka začíná "Převez mě, příteli" a pátá sloka také obsahuje oslovení. Tvrzení č. 2 není pravdivé.'
+                    },
+                    {
+                        id: 4,
+                        type: 'multiple-choice',
+                        points: 1,
+                        text: 'Které z následujících souvětí neobsahuje pravopisnou chybu?',
+                        options: [
+                            { label: 'A) Stoh shořel, ačkoliv ho hasičské sbory z celého okolí skoušely hasit celou noc.', value: 'A' },
+                            { label: 'B) Stoh zhořel, ačkoliv ho hasičské sbory z celého okolí zkoušely hasit celou noc.', value: 'B' },
+                            { label: 'C) Stoh shořel, ačkoliv ho hasičské zbory z celého okolí zkoušely hasit celou noc.', value: 'C' },
+                            { label: 'D) Stoh shořel, ačkoliv ho hasičské sbory z celého okolí zkoušely hasit celou noc.', value: 'D', correct: true }
+                        ],
+                        explanation: 'Správná forma je "shořel" (ne zhořel), "sbory" (ne zbory), "skoušely" (ne zkoušely). Správná je možnost D.'
+                    },
+                    {
+                        id: 5,
+                        type: 'multiple-choice',
+                        points: 1,
+                        text: 'K mým nejoblíbenějším šperkům patří brože a podobné drobné doplňky.',
+                        context: 'Jak je věta složena z hlediska vztahu mezi podstatnými jmény?',
+                        options: [
+                            { label: 'A) První je nadřazené druhému, druhé je souřadné se třetím.', value: 'A', correct: true },
+                            { label: 'B) První je podřazené druhému, druhé je podřazené třetímu.', value: 'B' },
+                            { label: 'C) Všechna tři jsou souřadná.', value: 'C' },
+                            { label: 'D) První je nadřazené všem ostatním.', value: 'D' }
+                        ],
+                        explanation: 'Správná odpověď je A. "Šperk" je nadřazené pojmům "brož" a "doplňky", která jsou si rovnocenná (souřadná).'
+                    },
+                    {
+                        id: 6,
+                        type: 'true-false',
+                        points: 1,
+                        text: 'Entové jsou smyšlené inteligentní stromy, které jsou schopny mluvit a chodit.',
+                        options: [
+                            { label: 'Ano (A)', value: 'A', correct: true },
+                            { label: 'Ne (N)', value: 'N' }
+                        ],
+                        explanation: 'Ano, podle textu jsou Entové (Pastýři stromů) smyšlená stvoření z knih J.R.R. Tolkiena.'
+                    },
+                    {
+                        id: 7,
+                        type: 'open-answer',
+                        points: 3,
+                        text: 'Vypište z první části TEXTU 1 tři dvouslabičné předložky.',
+                        acceptableAnswers: [
+                            'podle, od, pro',
+                            'od, na, do',
+                            'při, na, do',
+                            've, na, do'
+                        ],
+                        explanation: 'Správné dvouslabičné předložky z textu jsou např: podle (před), od (od), na (na), do (do), při (při), za (za), ve (ve) - jsou to všechny jednoduché předložky (ne složené).'
+                    },
+                    {
+                        id: 8,
+                        type: 'multiple-choice',
+                        points: 1,
+                        text: 'Vítězný strom v novozélandské soutěži Strom roku 2024 měří 32 m. Neobvyklý vzhled získal tím, jak rostl kolem svého hostitelského stromu. Které je tvrzení pravdivé?',
+                        options: [
+                            { label: 'A) Pouze první informace je jistá.', value: 'A' },
+                            { label: 'B) Pouze druhá informace je jistá.', value: 'B', correct: true },
+                            { label: 'C) Ani jedna informace není jistá.', value: 'C' },
+                            { label: 'D) Obě informace jsou jisté.', value: 'D' }
+                        ],
+                        explanation: 'Druhá informace je určitě pravdivá (je v textu), první informace je pouze údaj, věk stromu není znám.'
+                    },
+                    {
+                        id: 9,
+                        type: 'multiple-choice',
+                        points: 1,
+                        text: 'Která z následujících možností nejlépe vystihuje text o Día de los Muertos?',
+                        options: [
+                            { label: 'A) Jde o popis mexické kultury.', value: 'A' },
+                            { label: 'B) Jde o vysvětlení jednoho mexického svátku.', value: 'B', correct: true },
+                            { label: 'C) Jde o historii Mexika.', value: 'C' },
+                            { label: 'D) Jde o návod k přípravě jídla.', value: 'D' }
+                        ],
+                        explanation: 'Text se zaměřuje na vysvětlení konkrétního mexicého svátku Día de los Muertos, nikoli na celkový popis kultury.'
+                    },
+                    {
+                        id: 10,
+                        type: 'multiple-choice',
+                        points: 1,
+                        text: 'Ve které z následujících vět je správné psaní?',
+                        options: [
+                            { label: 'A) V Jablonci nad Nisou se vyrábí skleněná bižuterie.', value: 'A', correct: true },
+                            { label: 'B) Bratrancovi děti běhaly bosy po pláži.', value: 'B' },
+                            { label: 'C) Brandýští zastupitelé zvolili nového starostu.', value: 'C' },
+                            { label: 'D) Rozzlobená hospodyně shodila na zem tácy s občerstvením.', value: 'D' }
+                        ],
+                        explanation: 'Správná odpověď je A. Ostatní věty obsahují chyby: "bratranců" (ne bratrancovi), "Brandýšští" (ne Brandýští), "tácky" (ne tácy).'
+                    }
+                ]
+            }
+        };
+
+        // ===== APPLICATION STATE =====
+        let currentTest = null;
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let maxScore = 0;
+        let userAnswers = [];
+        let answered = false;
+
+        // ===== INITIALIZATION =====
+        function init() {
+            renderTestList();
+        }
+
+        function renderTestList() {
+            const testList = document.getElementById('testList');
+            testList.innerHTML = '';
+            
+            for (const [testId, test] of Object.entries(testData)) {
+                const totalPoints = test.questions.reduce((sum, q) => sum + q.points, 0);
+                const btn = document.createElement('button');
+                btn.className = 'test-btn';
+                btn.innerHTML = `
+                    <div>${test.name}</div>
+                    <div class="test-info">${test.questions.length} otázek • ${totalPoints} bodů</div>
+                `;
+                btn.onclick = () => startTest(testId);
+                testList.appendChild(btn);
+            }
+        }
+
+        function startTest(testId) {
+            currentTest = testData[testId];
+            currentQuestionIndex = 0;
+            score = 0;
+            userAnswers = [];
+            answered = false;
+            maxScore = currentTest.questions.reduce((sum, q) => sum + q.points, 0);
+
+            document.getElementById('introScreen').style.display = 'none';
+            document.getElementById('quizScreen').style.display = 'block';
+            document.getElementById('resultsScreen').classList.remove('show');
+
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            const question = currentTest.questions[currentQuestionIndex];
+            answered = false;
+
+            // Update progress
+            document.getElementById('currentQuestion').textContent = currentQuestionIndex + 1;
+            document.getElementById('totalQuestions').textContent = currentTest.questions.length;
+            document.getElementById('currentScore').textContent = score;
+            document.getElementById('maxScore').textContent = maxScore;
+
+            const progress = ((currentQuestionIndex) / currentTest.questions.length) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+
+            // Question
+            document.getElementById('questionText').textContent = question.text;
+            document.getElementById('pointsBadge').textContent = question.points + ' bod' + (question.points > 1 ? 'ů' : '');
+
+            // Context
+            const contextDiv = document.getElementById('questionContext');
+            if (question.context) {
+                contextDiv.innerHTML = `<div class="question-context">${question.context}</div>`;
+            } else {
+                contextDiv.innerHTML = '';
+            }
+
+            // Clear feedback
+            const feedback = document.getElementById('feedback');
+            feedback.classList.remove('show', 'correct', 'incorrect');
+
+            // Render answer options
+            const answerContainer = document.getElementById('answerContainer');
+            answerContainer.innerHTML = '';
+
+            switch(question.type) {
+                case 'multiple-choice':
+                    renderMultipleChoice(question, answerContainer);
+                    break;
+                case 'true-false':
+                    renderTrueFalse(question, answerContainer);
+                    break;
+                case 'open-answer':
+                    renderOpenAnswer(question, answerContainer);
+                    break;
+            }
+
+            document.getElementById('submitBtn').disabled = false;
+        }
+
+        function renderMultipleChoice(question, container) {
+            const optionsDiv = document.createElement('div');
+            optionsDiv.className = 'options-container';
+
+            question.options.forEach((option, idx) => {
+                const label = document.createElement('label');
+                label.className = 'option';
+
+                const radio = document.createElement('input');
+                radio.type = 'radio';
+                radio.name = 'answer';
+                radio.value = option.value;
+
+                const span = document.createElement('span');
+                span.textContent = option.label;
+
+                label.appendChild(radio);
+                label.appendChild(span);
+
+                label.onclick = () => {
+                    document.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+                    label.classList.add('selected');
+                };
+
+                optionsDiv.appendChild(label);
+            });
+
+            container.appendChild(optionsDiv);
+        }
+
+        function renderTrueFalse(question, container) {
+            const div = document.createElement('div');
+            div.className = 'true-false-container';
+
+            question.options.forEach(option => {
+                const btn = document.createElement('button');
+                btn.className = 'tf-option';
+                btn.textContent = option.label;
+                btn.onclick = () => {
+                    document.querySelectorAll('.tf-option').forEach(b => b.classList.remove('selected'));
+                    btn.classList.add('selected');
+                    btn.dataset.value = option.value;
+                };
+                div.appendChild(btn);
+            });
+
+            container.appendChild(div);
+        }
+
+        function renderOpenAnswer(question, container) {
+            const div = document.createElement('div');
+            div.className = 'open-answer-container';
+
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'open-answer-input';
+            input.placeholder = 'Napiš odpověď...';
+            input.id = 'openAnswer';
+
+            div.appendChild(input);
+            container.appendChild(div);
+        }
+
+        function submitAnswer() {
+            const question = currentTest.questions[currentQuestionIndex];
+            const feedback = document.getElementById('feedback');
+            let isCorrect = false;
+            let selectedAnswer = null;
+
+            switch(question.type) {
+                case 'multiple-choice':
+                    const selected = document.querySelector('input[name="answer"]:checked');
+                    if (!selected) {
+                        alert('Vyber odpověď!');
+                        return;
+                    }
+                    selectedAnswer = selected.value;
+                    isCorrect = question.options.find(opt => opt.value === selectedAnswer)?.correct;
+                    break;
+
+                case 'true-false':
+                    const tfSelected = document.querySelector('.tf-option.selected');
+                    if (!tfSelected) {
+                        alert('Vyber odpověď!');
+                        return;
+                    }
+                    selectedAnswer = tfSelected.dataset.value;
+                    isCorrect = question.options.find(opt => opt.value === selectedAnswer)?.correct;
+                    break;
+
+                case 'open-answer':
+                    const input = document.getElementById('openAnswer');
+                    if (!input.value.trim()) {
+                        alert('Napiš odpověď!');
+                        return;
+                    }
+                    selectedAnswer = input.value.trim().toLowerCase();
+                    const answers = question.acceptableAnswers.map(a => a.toLowerCase());
+                    isCorrect = answers.some(a => a.includes(selectedAnswer) || selectedAnswer.includes(a));
+                    break;
+            }
+
+            // Update score
+            if (isCorrect) {
+                score += question.points;
+            }
+            userAnswers.push({ questionId: question.id, answer: selectedAnswer, correct: isCorrect });
+
+            // Show feedback
+            feedback.classList.add('show');
+            feedback.classList.add(isCorrect ? 'correct' : 'incorrect');
+
+            let html = `<div class="feedback-title">${isCorrect ? '✓ Správně!' : '✗ Chybně!'}</div>`;
+            html += `<div class="feedback-content">`;
+            if (!isCorrect && question.type !== 'open-answer') {
+                const correctOpt = question.options.find(opt => opt.correct);
+                html += `<div class="correct-answer"><strong>Správná odpověď:</strong> ${correctOpt.label}</div>`;
+            }
+            if (question.explanation) {
+                html += `<div class="explanation"><strong>Vysvětlení:</strong> ${question.explanation}</div>`;
+            }
+            html += `</div>`;
+
+            feedback.innerHTML = html;
+
+            answered = true;
+            document.getElementById('submitBtn').textContent = currentQuestionIndex === currentTest.questions.length - 1 ? 'Skončit' : 'Další otázka';
+            document.getElementById('submitBtn').onclick = nextQuestion;
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+
+            if (currentQuestionIndex >= currentTest.questions.length) {
+                showResults();
+            } else {
+                renderQuestion();
+            }
+        }
+
+        function showResults() {
+            document.getElementById('quizScreen').style.display = 'none';
+            document.getElementById('resultsScreen').classList.add('show');
+
+            const correct = userAnswers.filter(a => a.correct).length;
+            const incorrect = userAnswers.filter(a => !a.correct).length;
+            const percentage = Math.round((score / maxScore) * 100);
+
+            document.getElementById('finalScore').textContent = score + ' / ' + maxScore;
+            document.getElementById('correctCount').textContent = correct;
+            document.getElementById('incorrectCount').textContent = incorrect;
+            document.getElementById('successRate').textContent = percentage + '%';
+
+            let message = '';
+            if (percentage >= 90) message = 'Výborně! 🌟 Máš to opravdu zvládnuté!';
+            else if (percentage >= 75) message = 'Dobré! 👍 Chceš si zkusit znovu?';
+            else if (percentage >= 50) message = 'Slušně! 📚 Chceš se něčeho naučit?';
+            else message = 'Pokus se znovu! 💪 Určitě to půjde lépe!';
+
+            document.getElementById('resultMessage').textContent = message;
+        }
+
+        function restartQuiz() {
+            document.getElementById('resultsScreen').classList.remove('show');
+            document.getElementById('quizScreen').style.display = 'none';
+            document.getElementById('introScreen').style.display = 'block';
+            renderTestList();
+        }
+
+        function goBack() {
+            document.getElementById('quizScreen').style.display = 'none';
+            document.getElementById('introScreen').style.display = 'block';
+        }
+
+        // Start
+        init();
+    </script>
+</body>
+</html>
