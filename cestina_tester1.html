@@ -1,0 +1,1627 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Český Jazyk - Interaktivní Tréninky</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 10px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 15px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        /* ===== INTRO SCREEN ===== */
+        .intro-screen {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .intro-screen h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        .test-list {
+            display: grid;
+            gap: 15px;
+            margin: 30px 0;
+        }
+
+        .test-btn {
+            padding: 15px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .test-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .test-info {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        /* ===== QUIZ SCREEN ===== */
+        .quiz-screen {
+            display: none;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #eee;
+            border-radius: 3px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s;
+        }
+
+        .score-display {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 10px;
+            background: #f5f5f5;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .score-display span {
+            color: #666;
+        }
+
+        .question-number {
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .question-container {
+            margin-bottom: 30px;
+        }
+
+        .question-header {
+            margin-bottom: 20px;
+        }
+
+        .question-text {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .points-badge {
+            display: inline-block;
+            background: #f0f0f0;
+            color: #667eea;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .question-context {
+            background: #f9f9f9;
+            padding: 12px;
+            border-left: 3px solid #667eea;
+            margin-bottom: 15px;
+            font-size: 14px;
+            color: #555;
+            border-radius: 4px;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+
+        /* ===== MULTIPLE CHOICE ===== */
+        .options-container {
+            display: grid;
+            gap: 10px;
+        }
+
+        .option {
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: white;
+            text-align: left;
+            font-size: 15px;
+        }
+
+        .option:hover {
+            border-color: #667eea;
+            background: #f5f7ff;
+        }
+
+        .option.selected {
+            border-color: #667eea;
+            background: #e8eaf6;
+        }
+
+        .option label {
+            display: block;
+            cursor: pointer;
+        }
+
+        .option input[type="radio"],
+        .option input[type="checkbox"] {
+            margin-right: 10px;
+            cursor: pointer;
+        }
+
+        /* ===== OPEN ANSWER ===== */
+        .open-answer-container {
+            display: flex;
+            gap: 10px;
+        }
+
+        .open-answer-input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 15px;
+            font-family: inherit;
+        }
+
+        .open-answer-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        /* ===== TRUE/FALSE ===== */
+        .true-false-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .tf-option {
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .tf-option:hover {
+            border-color: #667eea;
+        }
+
+        .tf-option.selected {
+            border-color: #667eea;
+            background: #e8eaf6;
+        }
+
+        .tf-option.true { color: #27ae60; }
+        .tf-option.false { color: #e74c3c; }
+
+        /* ===== MATCHING ===== */
+        .matching-container {
+            display: grid;
+            gap: 12px;
+        }
+
+        .match-pair {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .match-item {
+            padding: 12px;
+            background: #f5f5f5;
+            border-radius: 6px;
+            font-size: 14px;
+            border: 2px solid #ddd;
+        }
+
+        .match-select {
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .match-select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        /* ===== FEEDBACK ===== */
+        .feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 6px;
+            display: none;
+        }
+
+        .feedback.show {
+            display: block;
+        }
+
+        .feedback.correct {
+            background: #d4edda;
+            border: 2px solid #28a745;
+            color: #155724;
+        }
+
+        .feedback.incorrect {
+            background: #f8d7da;
+            border: 2px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .feedback-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 15px;
+        }
+
+        .feedback-content {
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .correct-answer {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid currentColor;
+            opacity: 0.9;
+        }
+
+        .explanation {
+            margin-top: 8px;
+            font-style: italic;
+            opacity: 0.95;
+        }
+
+        /* ===== BUTTONS ===== */
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-submit:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-next {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-next:hover {
+            background: #e0e0e0;
+        }
+
+        .btn-back {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .btn-back:hover {
+            background: #f5f7ff;
+        }
+
+        /* ===== RESULTS SCREEN ===== */
+        .results-screen {
+            display: none;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .results-screen.show {
+            display: block;
+        }
+
+        .final-score {
+            font-size: 48px;
+            color: #667eea;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        .results-stats {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-size: 16px;
+        }
+
+        .stats-row {
+            display: flex;
+            justify-content: space-around;
+            margin: 10px 0;
+        }
+
+        .stat-item {
+            flex: 1;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .stat-value.correct {
+            color: #27ae60;
+        }
+
+        .stat-value.incorrect {
+            color: #e74c3c;
+        }
+
+        .results-message {
+            font-size: 18px;
+            color: #333;
+            margin: 20px 0;
+        }
+
+        .btn-restart {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+
+        .btn-restart:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+
+            .header h1 {
+                font-size: 22px;
+            }
+
+            .question-text {
+                font-size: 15px;
+            }
+
+            .option, .tf-option, .match-item {
+                font-size: 14px;
+                padding: 10px;
+            }
+
+            .final-score {
+                font-size: 36px;
+            }
+
+            .stat-value {
+                font-size: 20px;
+            }
+
+            .match-pair {
+                grid-template-columns: 1fr;
+            }
+
+            .match-select {
+                width: 100%;
+            }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .section-title {
+            color: #667eea;
+            font-size: 12px;
+            text-transform: uppercase;
+            font-weight: bold;
+            margin-top: 15px;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 Český Jazyk - Tréninky</h1>
+            <p>Interaktivní příprava na přijímačky</p>
+        </div>
+
+        <!-- INTRO SCREEN -->
+        <div class="intro-screen" id="introScreen">
+            <h2>Vyber si test:</h2>
+            <div class="test-list" id="testList"></div>
+        </div>
+
+        <!-- QUIZ SCREEN -->
+        <div class="quiz-screen" id="quizScreen">
+            <button class="btn btn-back" onclick="goBack()">← Zpět na výběr</button>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+
+            <div class="score-display">
+                <span>Otázka <span class="question-number" id="currentQuestion">1</span> / <span id="totalQuestions">10</span></span>
+                <span>Body: <span id="currentScore">0</span> / <span id="maxScore">50</span></span>
+            </div>
+
+            <div class="question-container">
+                <div class="question-header">
+                    <div class="question-text" id="questionText"></div>
+                    <span class="points-badge" id="pointsBadge">1 bod</span>
+                </div>
+
+                <div id="questionContext"></div>
+                <div id="answerContainer"></div>
+
+                <div class="feedback" id="feedback"></div>
+
+                <div class="button-group">
+                    <button class="btn btn-submit" id="submitBtn" onclick="submitAnswer()">Odeslat odpověď</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- RESULTS SCREEN -->
+        <div class="results-screen" id="resultsScreen">
+            <h2>Test Completed! 🎉</h2>
+            <div class="final-score" id="finalScore">0 / 50</div>
+            
+            <div class="results-stats">
+                <div class="stats-row">
+                    <div class="stat-item">
+                        <div class="stat-label">Správné odpovědi</div>
+                        <div class="stat-value correct" id="correctCount">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Chybné odpovědi</div>
+                        <div class="stat-value incorrect" id="incorrectCount">0</div>
+                    </div>
+                </div>
+                <div class="stats-row">
+                    <div class="stat-item">
+                        <div class="stat-label">Úspěšnost</div>
+                        <div class="stat-value" id="successRate">0%</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="results-message" id="resultMessage"></div>
+            <button class="btn-restart" onclick="restartQuiz()">Začít znovu</button>
+        </div>
+    </div>
+
+    <script>
+        // ===== TEST DATA =====
+        const testData = {
+            'CJL9-TDPN-D09': {
+                name: 'Český Jazyk 9 - Diagnostický test',
+                description: 'Test č. 1 - Celý test',
+                questions: [
+                    {
+                        id: 1,
+                        type: 'multiple-choice',
+                        points: 1,
+                        text: 'Které z následujících tvrzení odpovídá TEXTU 1?',
+                        context: 'Text: Převez mě, příteli, na druhý břeh...',
+                        options: [
+                            { label: 'A) Autor textu slyšel v noci někoho zpívat.', value: 'A' },
+                            { label: 'B) Autor textu by se rád setkal s někým, kdo již zemřel.', value: 'B', correct: true },
+                            { label: 'C) Autor textu viděl nad vodou létat motýly.', value: 'C' },
+                            { label: 'D) Autor textu se rozhodl, že vystoupí z loďky a zůstane na druhém břehu.', value: 'D' }
+                        ],
+                        explanation: 'Správná odpověď je B. Z textu vyplývá, že autor chce vidět své zemřelé blízké ("Láska i smrt jsou jen okamžiky, polibky krásné Euridiky").'
+                    },
+                    {
+                        id: 2,
+                        type: 'multiple-choice',
+                        points: 1,
+                        text: 'Které z následujících tvrzení o dvou verších podtržených v TEXTU 1 je pravdivé?',
+                        options: [
+                            { label: 'A) Pouze v prvním verši se vyskytuje jak kontrast, tak i zvukosled.', value: 'A' },
+                            { label: 'B) V obou verších se vyskytuje jak kontrast, tak i zvukosled.', value: 'B', correct: true },
+                            { label: 'C) V prvním verši se vyskytuje kontrast a v druhém verši se vyskytuje zvukosled.', value: 'C' },
+                            { label: 'D) V prvním verši se vyskytuje zvukosled a v druhém verši se vyskytuje kontrast.', value: 'D' }
+                        ],
+                        explanation: 'V obou verších se vyskytují oba prvky - zvukosled (opakování hlásek) i kontrast.'
+                    },
+                    {
+                        id: 3,
+                        type: 'true-false',
+                        points: 1,
+                        text: 'Je alespoň některé z následujících tvrzení pravdivé?',
+                        context: 'Tvrzení č. 1: V první a v páté sloce se vyskytuje oslovení. Tvrzení č. 2: Poslední verš ve čtvrté, páté i šesté sloce je pětislabičný.',
+                        options: [
+                            { label: 'A) ano, ale pouze tvrzení č. 1', value: 'A', correct: true },
+                            { label: 'B) ano, ale pouze tvrzení č. 2', value: 'B' },
+                            { label: 'C) ano, každé z těchto tvrzení', value: 'C' },
+                            { label: 'D) ne, žádné z těchto tvrzení', value: 'D' }
+                        ],
+                        explanation: 'Tvrzení č. 1 je pravdivé - první sloka začíná "Převez mě, příteli" a pátá sloka také obsahuje oslovení. Tvrzení č. 2 není pravdivé.'
+                    },
+                    {
+                        id: 4,
+                        type: 'multiple-choice',
+                        points: 1,
+                        text: 'Které z následujících souvětí neobsahuje pravopisnou chybu?',
+                        options: [
+                            { label: 'A) Stoh shořel, ačkoliv ho hasičské sbory z celého okolí skoušely hasit celou noc.', value: 'A' },
+                            { label: 'B) Stoh zhořel, ačkoliv ho hasičské sbory z celého okolí zkoušely hasit celou noc.', value: 'B' },
+                            { label: 'C) Stoh shořel, ačkoliv ho hasičské zbory z celého okolí zkoušely hasit celou noc.', value: 'C' },
+                            { label: 'D) Stoh shořel, ačkoliv ho hasičské sbory z celého okolí zkoušely hasit celou noc.', value: 'D', correct: true }
+                        ],
+                        explanation: 'Správná forma je "shořel" (ne zhořel), "sbory" (ne zbory), "skoušely" (ne zkoušely). Správná je možnost D.'
+                    },
+                    {
+                        id: 5,
+                        type: 'multiple-choice',
+                        points: 1,
+                        text: 'K mým nejoblíbenějším šperkům patří brože a podobné drobné doplňky.',
+                        context: 'Jak je věta složena z hlediska vztahu mezi podstatnými jmény?',
+                        options: [
+                            { label: 'A) První je nadřazené druhému, druhé je souřadné se třetím.', value: 'A', correct: true },
+                            { label: 'B) První je podřazené druhému, druhé je podřazené třetímu.', value: 'B' },
+                            { label: 'C) Všechna tři jsou souřadná.', value: 'C' },
+                            { label: 'D) První je nadřazené všem ostatním.', value: 'D' }
+                        ],
+                        explanation: 'Správná odpověď je A. "Šperk" je nadřazené pojmům "brož" a "doplňky", která jsou si rovnocenná (souřadná).'
+                    },
+                    {
+                        id: 6,
+                        type: 'true-false',
+                        points: 1,
+                        text: 'Entové jsou smyšlené inteligentní stromy, které jsou schopny mluvit a chodit.',
+                        options: [
+                            { label: 'Ano (A)', value: 'A', correct: true },
+                            { label: 'Ne (N)', value: 'N' }
+                        ],
+                        explanation: 'Ano, podle textu jsou Entové (Pastýři stromů) smyšlená stvoření z knih J.R.R. Tolkiena.'
+                    },
+                    {
+                        id: 7,
+                        type: 'open-answer',
+                        points: 3,
+                        text: 'Vypište z první části TEXTU 1 tři dvouslabičné předložky.',
+                        acceptableAnswers: [
+                            'podle, od, pro',
+                            'od, na, do',
+                            'při, na, do',
+                            've, na, do'
+                        ],
+                        explanation: 'Správné dvouslabičné předložky z textu jsou např: podle (před), od (od), na (na), do (do), při (při), za (za), ve (ve) - jsou to všechny jednoduché předložky (ne složené).'
+                    },
+                    {
+                        id: 8,
+                        type: 'multiple-choice',
+                        points: 1,
+                        text: 'Vítězný strom v novozélandské soutěži Strom roku 2024 měří 32 m. Neobvyklý vzhled získal tím, jak rostl kolem svého hostitelského stromu. Které je tvrzení pravdivé?',
+                        options: [
+                            { label: 'A) Pouze první informace je jistá.', value: 'A' },
+                            { label: 'B) Pouze druhá informace je jistá.', value: 'B', correct: true },
+                            { label: 'C) Ani jedna informace není jistá.', value: 'C' },
+                            { label: 'D) Obě informace jsou jisté.', value: 'D' }
+                        ],
+                        explanation: 'Druhá informace je určitě pravdivá (je v textu), první informace je pouze údaj, věk stromu není znám.'
+                    },
+                    {
+                        id: 9,
+                        type: 'multiple-choice',
+                        points: 1,
+                        text: 'Která z následujících možností nejlépe vystihuje text o Día de los Muertos?',
+                        options: [
+                            { label: 'A) Jde o popis mexické kultury.', value: 'A' },
+                            { label: 'B) Jde o vysvětlení jednoho mexického svátku.', value: 'B', correct: true },
+                            { label: 'C) Jde o historii Mexika.', value: 'C' },
+                            { label: 'D) Jde o návod k přípravě jídla.', value: 'D' }
+                        ],
+                        explanation: 'Text se zaměřuje na vysvětlení konkrétního mexicého svátku Día de los Muertos, nikoli na celkový popis kultury.'
+                    },
+                    {
+                        id: 10,
+                        type: 'multiple-choice',
+                        points: 1,
+                        text: 'Ve které z následujících vět je správné psaní?',
+                        options: [
+                            { label: 'A) V Jablonci nad Nisou se vyrábí skleněná bižuterie.', value: 'A', correct: true },
+                            { label: 'B) Bratrancovi děti běhaly bosy po pláži.', value: 'B' },
+                            { label: 'C) Brandýští zastupitelé zvolili nového starostu.', value: 'C' },
+                            { label: 'D) Rozzlobená hospodyně shodila na zem tácy s občerstvením.', value: 'D' }
+                        ],
+                        explanation: 'Správná odpověď je A. Ostatní věty obsahují chyby: "bratranců" (ne bratrancovi), "Brandýšští" (ne Brandýští), "tácky" (ne tácy).'
+                    }
+                ]
+            },
+            'CJL9-TDPN-D08': {
+                name: 'Český Jazyk 9 - Diagnostický test č. 2 (D08)',
+                description: 'Test č. 2 - 30 úloh, 50 bodů',
+                questions: [
+                    // === ÚLOHY 1–3: TEXT 1 (Seifert) + TEXT 2 (Rýmové echo) ===
+                    {
+                        id: 1,
+                        type: 'multiple-choice',
+                        points: 1,
+                        text: 'Tvrzení č. 1: Nemo a Korkorán vedli dobrodružný život.\nTvrzení č. 2: V básni se objevuje kontrast.\n\nOdpovídá alespoň některé z výše uvedených tvrzení výchozímu TEXTU 1?',
+                        context: 'TEXT 1 (J. Seifert, Píseň o jízdě na kolenou):\n(1) Zjeví se někdy volán nevolán / kapitán Nemo nebo Korkorán.\n(2) Ten první přijde v ruce s kompasem, / druhému meč se houpá pod pasem.\n(3) Odejde první, zmizí ve světě, / tygřici druhý hladí po hřbetě\n(4) a také zmizí v hustém pralese; / už je to dlouho, co tak známe se.\n(5) Někdy však přijde – to je nejsladší, / můj otec, zvolna přejde pavlačí\n(6) a vejde tiše, vstane ve dveřích, / jak by chtěl z šatů setřást sníh.\n(7) Co jsem se naplul moří s Nautilem, / v pralese brouzdal vlhkém, zavilém!\n(8) Však v nejkrásnější byl jsem pevnině, / když tatínkovi jel jsem na klíně.',
+                        options: [
+                            { label: 'A) ano, obě tato tvrzení', value: 'A', correct: true },
+                            { label: 'B) ano, pouze tvrzení č. 1', value: 'B' },
+                            { label: 'C) ano, pouze tvrzení č. 2', value: 'C' },
+                            { label: 'D) ne, žádné z těchto tvrzení', value: 'D' }
+                        ],
+                        explanation: 'Obě tvrzení jsou pravdivá. Nemo (kapitán ponorky) i Korkorán (bojovník s tygry) vedli dobrodružný život. Kontrast se v básni vyskytuje – např. dobrodružství vs. jízda na kolenou u tatínka.'
+                    },
+                    {
+                        id: 2,
+                        type: 'multiple-choice',
+                        points: 1,
+                        text: 'Které z následujících tvrzení o verši podtrženém v TEXTU 1 je pravdivé?\n\nPodtržený verš: „jak by chtěl z šatů setřást sníh"',
+                        context: 'TEXT 1 – sloky (5)–(6):\n(5) Někdy však přijde – to je nejsladší, / můj otec, zvolna přejde pavlačí\n(6) a vejde tiše, vstane ve dveřích, / jak by chtěl z šatů setřást sníh.',
+                        options: [
+                            { label: 'A) Tento verš je devítislabičný, obsahuje přirovnání a rýmuje se s bezprostředně předcházejícím veršem, který je také devítislabičný.', value: 'A' },
+                            { label: 'B) Tento verš je osmislabičný, obsahuje přirovnání a rýmuje se s bezprostředně předcházejícím veršem, který je desetislabičný.', value: 'B', correct: true },
+                            { label: 'C) Tento verš je osmislabičný, neobsahuje přirovnání a rýmuje se s bezprostředně předcházejícím veršem, který je desetislabičný.', value: 'C' },
+                            { label: 'D) Tento verš je devítislabičný, neobsahuje přirovnání a rýmuje se s bezprostředně předcházejícím veršem, který je také devítislabičný.', value: 'D' }
+                        ],
+                        explanation: '„jak by chtěl z šatů setřást sníh" = jak-by-chtěl-z ša-tů-se-třást-sníh = 8 slabik. Obsahuje přirovnání (jak by chtěl). Předchozí verš „a vejde tiše, vstane ve dveřích" = 10 slabik. Správná odpověď je B.'
+                    },
+                    {
+                        id: 3,
+                        type: 'multiple-choice',
+                        points: 1,
+                        text: 'Které z následujících tvrzení o TEXTU 1 je pravdivé?\n(Úlohu řešte na základě definice rýmového echa v TEXTU 2.)',
+                        context: 'TEXT 2: Rýmové echo – vzniká, když se v jedné sloce vyskytují verše, které se rýmují a zároveň končí různými slovy, z nichž jedno je obsaženo ve druhém slově (např. kapesní – sní).\n\nTEXT 1 – rýmy ve slokách:\n(2) kompasem / pasem\n(4) pralese / se',
+                        options: [
+                            { label: 'A) Rýmové echo se nevyskytuje v žádné sloce.', value: 'A' },
+                            { label: 'B) Rýmové echo se vyskytuje pouze v jedné sloce.', value: 'B' },
+                            { label: 'C) Rýmové echo se vyskytuje ve dvou slokách.', value: 'C', correct: true },
+                            { label: 'D) Rýmové echo se vyskytuje ve třech slokách.', value: 'D' }
+                        ],
+                        explanation: 'Rýmové echo se vyskytuje ve 2. sloce (kompasem – pasem: „pasem" je obsaženo v „kompasem") a ve 4. sloce (pralese – se: „se" je obsaženo v „pralese"). Správná odpověď je C.'
+                    },
+                    // === ÚLOHA 4: Pravopis A/N ===
+                    {
+                        id: '4.1',
+                        type: 'true-false',
+                        points: 1,
+                        text: 'Je následující věta napsána pravopisně správně?\n\n„V železářství mi poradili, co dělat s rozbitou kropící konví."',
+                        options: [
+                            { label: 'A – ano, je správně', value: 'A' },
+                            { label: 'N – ne, není správně', value: 'N', correct: true }
+                        ],
+                        explanation: 'Správně má být „kropicí konví" (účelové přídavné jméno „kropicí", nikoli příčestí „kropící").'
+                    },
+                    {
+                        id: '4.2',
+                        type: 'true-false',
+                        points: 1,
+                        text: 'Je následující věta napsána pravopisně správně?\n\n„V podzimním větru se třepetali pestrobarevní papíroví draci."',
+                        options: [
+                            { label: 'A – ano, je správně', value: 'A', correct: true },
+                            { label: 'N – ne, není správně', value: 'N' }
+                        ],
+                        explanation: 'Věta je pravopisně správná. „Třepetali" – rod mužský životný, „pestrobarevní papíroví draci" – vše správně.'
+                    },
+                    {
+                        id: '4.3',
+                        type: 'true-false',
+                        points: 1,
+                        text: 'Je následující věta napsána pravopisně správně?\n\n„Dobříští starousedlíci zřejmě protestovali proti výstavbě nových sídlišť."',
+                        options: [
+                            { label: 'A – ano, je správně', value: 'A' },
+                            { label: 'N – ne, není správně', value: 'N', correct: true }
+                        ],
+                        explanation: 'Správně má být „Dobříšští" (od Dobříš → dobříšský → Dobříšští). „Dobříští" je chybný tvar.'
+                    },
+                    {
+                        id: '4.4',
+                        type: 'true-false',
+                        points: 1,
+                        text: 'Je následující věta napsána pravopisně správně?\n\n„Krokodýli a ještěrky jsou plazi, ale mloci nebo čolci mezi plazi nepatří."',
+                        options: [
+                            { label: 'A – ano, je správně', value: 'A', correct: true },
+                            { label: 'N – ne, není správně', value: 'N' }
+                        ],
+                        explanation: 'Věta je pravopisně správná. „Krokodýli" (vzor muži), „plazi" (vzor muži), „mloci" (vzor muži), „čolci" (vzor muži) – vše je zapsáno správně.'
+                    },
+                    // === ÚLOHA 5 ===
+                    {
+                        id: 5,
+                        type: 'multiple-choice',
+                        points: 1,
+                        text: 'Které z následujících tvrzení týkajících se výchozího textu je pravdivé?',
+                        context: 'Jana celý týden přemýšlela nad tím, jak zpracovat projekt, který jí zadal její nadřízený. Radila se i se svými spolupracovníky, ale nikdo jí nedokázal pomoct. Poté, co projekt s vypětím všech sil nakonec odprezentovala, za ní přišel kolega Lukáš a řekl jí, že by určitě podal lepší výkon. „Za míru nikdo nemudruje," pomyslela si roztrpčeně Jana.',
+                        options: [
+                            { label: 'A) Jana použila české ustálené slovní spojení, které vyjadřuje, že není snadné nalézt chyby na již odvedené práci.', value: 'A' },
+                            { label: 'B) Jana použila české ustálené slovní spojení, které vyjadřuje, že je snadné nalézt chyby na již odvedené práci.', value: 'B' },
+                            { label: 'C) Jana popletla české ustálené slovní spojení „po bitvě je každý generál" vyjadřující, že není snadné nalézt chyby na již odvedené práci.', value: 'C' },
+                            { label: 'D) Jana popletla české ustálené slovní spojení „po bitvě je každý generál" vyjadřující, že je snadné nalézt chyby na již odvedené práci.', value: 'D', correct: true }
+                        ],
+                        explanation: 'Jana řekla „Za míru nikdo nemudruje" – to je zkomolená verze přísloví „Po bitvě je každý generál", které vyjadřuje, že po dokončení úkolu je snadné kritizovat. Správná odpověď je D.'
+                    },
+                    // === ÚLOHA 6: Základní skladební dvojice ===
+                    {
+                        id: '6.1',
+                        type: 'open-answer',
+                        points: 1,
+                        text: 'Vypište z věty základní skladební dvojici.\n\n„V případě pochybností je vždy lepší poradit se s odborníky."',
+                        acceptableAnswers: ['je lepší poradit se', 'poradit se je lepší', 'je lepší'],
+                        explanation: 'Základní skladební dvojice: „(je) lepší poradit se" – přísudek jmenný se sponou „je lepší" a podmět vyjádřený infinitivem „poradit se".'
+                    },
+                    {
+                        id: '6.2',
+                        type: 'open-answer',
+                        points: 1,
+                        text: 'Vypište z věty základní skladební dvojici.\n\n„Léčivé prameny obsahují určité množství minerálních solí."',
+                        acceptableAnswers: ['prameny obsahují', 'obsahují prameny'],
+                        explanation: 'Základní skladební dvojice: „prameny obsahují" – podmět „prameny" + přísudek „obsahují".'
+                    },
+                    // === ÚLOHY 7–13: Text Vitka (K. Tučková) ===
+                    {
+                        id: '7.1',
+                        type: 'true-false',
+                        points: 1,
+                        text: 'Vyplývá z textu jednoznačně:\n„Nejstarší filharmonik podporuje zapojení žen do politiky."',
+                        context: 'NEJSTARŠÍ FILHARMONIK: To je skandální – tyhle kalhotnice už nevědí co by! Volební hlas si vydupaly, do politiky se cpou, o práci slušné chlapy obírají, a nakonec i stejný plat by chtěly – nic!',
+                        options: [
+                            { label: 'A – ano, vyplývá', value: 'A' },
+                            { label: 'N – ne, nevyplývá', value: 'N', correct: true }
+                        ],
+                        explanation: 'Nejstarší filharmonik naopak kritizuje zapojení žen do politiky („do politiky se cpou"). Tvrzení z textu nevyplývá.'
+                    },
+                    {
+                        id: '7.2',
+                        type: 'true-false',
+                        points: 1,
+                        text: 'Vyplývá z textu jednoznačně:\n„V orchestru hraje i několik žen."',
+                        context: 'Vitka vidí před sebou zachmuřené, nepřístupné těleso složené výhradně ze starších mužů.',
+                        options: [
+                            { label: 'A – ano, vyplývá', value: 'A' },
+                            { label: 'N – ne, nevyplývá', value: 'N', correct: true }
+                        ],
+                        explanation: 'Text uvádí, že orchestr byl složen „výhradně ze starších mužů". V orchestru nehrály žádné ženy.'
+                    },
+                    {
+                        id: '7.3',
+                        type: 'true-false',
+                        points: 1,
+                        text: 'Vyplývá z textu jednoznačně:\n„Vitka je přesvědčená o tom, že orchestr zvládne její skladbu nazkoušet."',
+                        context: 'VITKA: …během tohoto týdne spolu strávíme dvakrát tři hodiny, abychom nazkoušeli moji Vojenskou symfonietu. To je neslýchaně málo, ale my po nich přesto předstoupíme před prezidenta Beneše a předvedeme jemu i všem přítomným, proč má tento orchestr pověst nejlepšího tělesa v republice.',
+                        options: [
+                            { label: 'A – ano, vyplývá', value: 'A', correct: true },
+                            { label: 'N – ne, nevyplývá', value: 'N' }
+                        ],
+                        explanation: 'Vitka říká, že spolu skladbu nazkoušejí a předvedou ji. Je přesvědčená, že to zvládnou.'
+                    },
+                    {
+                        id: '7.4',
+                        type: 'true-false',
+                        points: 1,
+                        text: 'Vyplývá z textu jednoznačně:\n„Všichni členové orchestru mluvili pouze česky."',
+                        context: 'FILHARMONIK: Podívejte se na ni pořádně – určitě je to Židovka, ti se vetřou všude! Ale es kommt der Tag!',
+                        options: [
+                            { label: 'A – ano, vyplývá', value: 'A' },
+                            { label: 'N – ne, nevyplývá', value: 'N', correct: true }
+                        ],
+                        explanation: 'Jeden z filharmoniků řekl „Ale es kommt der Tag!" – to je němčina. Nemluvili tedy pouze česky.'
+                    },
+                    {
+                        id: 8,
+                        type: 'multiple-choice',
+                        points: 1,
+                        text: 'Které z následujících tvrzení odpovídá výchozímu textu o Vitce?',
+                        options: [
+                            { label: 'A) Text je příkladem prózy.', value: 'A' },
+                            { label: 'B) Text je příkladem poezie.', value: 'B' },
+                            { label: 'C) Text je příkladem divadelní hry.', value: 'C', correct: true },
+                            { label: 'D) Text je příkladem sci-fi literatury.', value: 'D' }
+                        ],
+                        explanation: 'Text obsahuje scénické poznámky (kurzívou) a repliky postav – jedná se o divadelní hru.'
+                    },
+                    {
+                        id: 9,
+                        type: 'multiple-choice',
+                        points: 1,
+                        text: 'Které z následujících tvrzení je na základě výchozího textu o Vitce pravdivé?',
+                        options: [
+                            { label: 'A) V textu promlouvají tři postavy včetně Vitky.', value: 'A' },
+                            { label: 'B) V textu nepadne jméno autora skladby, kterou orchestr zkouší.', value: 'B' },
+                            { label: 'C) V textu je zmíněno jméno státníka, jemuž bude skladba zahrána.', value: 'C', correct: true },
+                            { label: 'D) Hlavní postava má dva týdny na to, aby s orchestrem nazkoušela skladbu.', value: 'D' }
+                        ],
+                        explanation: 'Vitka zmiňuje prezidenta Beneše. Autorkou skladby je sama Vitka (Vítězslava Kaprálová) – její jméno padne. Promlouvá více než 3 postavy. Má jen jeden týden, ne dva.'
+                    },
+                    {
+                        id: 10,
+                        type: 'multiple-choice',
+                        points: 1,
+                        text: 'Které z následujících slov z výchozího textu o Vitce neobsahuje předponu?',
+                        options: [
+                            { label: 'A) hovoří', value: 'A', correct: true },
+                            { label: 'B) ztiší', value: 'B' },
+                            { label: 'C) pozná', value: 'C' },
+                            { label: 'D) ztracená', value: 'D' }
+                        ],
+                        explanation: '„Hovořit" nemá předponu – kořen je „hovor". Ostatní slova mají předpony: z-tiší, po-zná, z-tracená.'
+                    },
+                    {
+                        id: 11,
+                        type: 'open-answer',
+                        points: 3,
+                        text: 'Vypište z podtržené části textu tři dvouslabičná neohebná slova.\n\n(Podtržená část: „Filharmonici ji pozorují, jak kolem nich bez povšimnutí prochází, nakukují do šatny, kde se připravuje – čte notový zápis, polohlasně si předzpěvuje, drbe se taktovkou na zádech nebo ji skousne mezi zuby –, a mezitím o ní hovoří.")',
+                        acceptableAnswers: ['kolem, nebo, mezi', 'kolem nebo mezi', 'mezi, kolem, nebo', 'nebo, mezi, kolem', 'nebo kolem mezi', 'mezi kolem nebo'],
+                        explanation: 'Dvouslabičná neohebná slova z podtrženého textu: „kolem" (předložka, 2 slabiky), „nebo" (spojka, 2 slabiky), „mezi" (předložka, 2 slabiky).'
+                    },
+                    {
+                        id: 12,
+                        type: 'multiple-choice',
+                        points: 1,
+                        text: 'Které z následujících tvrzení o slovech tučně vyznačených ve výchozím textu NENÍ pravdivé?\n\nTučná slova: skladby, ženská, všude, energicky',
+                        context: '• „Uvádět skladby téhle Nanynky…"\n• „Kdo to kdy slyšel, aby ženská psala o vojně!?"\n• „…ti se vetřou všude!"\n• „Pak zdvihne ruce a energicky švihne taktovkou."',
+                        options: [
+                            { label: 'A) Slovo „skladby" je v textu předmětem.', value: 'A' },
+                            { label: 'B) Slovo „ženská" je v textu přívlastkem shodným.', value: 'B', correct: true },
+                            { label: 'C) Slovo „všude" je v textu příslovečným určením místa.', value: 'C' },
+                            { label: 'D) Slovo „energicky" je v textu příslovečným určením způsobu.', value: 'D' }
+                        ],
+                        explanation: 'Slovo „ženská" je v dané větě podmětem (kdo psala? – ženská), nikoli přívlastkem shodným. Správná odpověď je B.'
+                    },
+                    {
+                        id: 13,
+                        type: 'multiple-choice',
+                        points: 1,
+                        text: 'Který z následujících úseků výchozího textu o Vitce neobsahuje žádné citově zabarvené slovo?',
+                        options: [
+                            { label: 'A) „Uvádět skladby téhle Nanynky spolu s Dvořákovými a Sukovými"', value: 'A' },
+                            { label: 'B) „Volební hlas si vydupaly, do politiky se cpou"', value: 'B' },
+                            { label: 'C) „Však děvenka brzo pozná, kde je její místo"', value: 'C' },
+                            { label: 'D) „Z jejich řad zní vzdorný šum a pohrdavý smích"', value: 'D', correct: true }
+                        ],
+                        explanation: 'A) „Nanynky" je citově zabarvené (zdrobnělina). B) „vydupaly", „cpou" jsou expresivní. C) „děvenka" je zdrobnělina. D) „vzdorný" a „pohrdavý" jsou neutrální popisná přídavná jména, nejsou citově zabarvená.'
+                    },
+                    // === ÚLOHA 14 ===
+                    {
+                        id: '14.1',
+                        type: 'open-answer',
+                        points: 1,
+                        text: 'Napište náležitý spisovný tvar slova „předvedený", který patří na vynechané místo ve větě:\n\n„Pachateli _____ před soud bylo sděleno, že…"',
+                        acceptableAnswers: ['předvedenému'],
+                        explanation: 'Správný tvar je „předvedenému" (3. pád jednotného čísla, vzor mladý). Celá věta: „Pachateli předvedenému před soud…"'
+                    },
+                    {
+                        id: '14.2',
+                        type: 'open-answer',
+                        points: 1,
+                        text: 'Napište náležitý spisovný tvar slova „spáchaný", který patří na vynechané místo ve větě:\n\n„…obvinění ze zločinů _____ pod vlivem omamných látek."',
+                        acceptableAnswers: ['spáchaných'],
+                        explanation: 'Správný tvar je „spáchaných" (2. pád množného čísla, vzor mladý). Celá věta: „…ze zločinů spáchaných pod vlivem…"'
+                    },
+                    // === ÚLOHA 15: Nespisovná slova ===
+                    {
+                        id: '15.1',
+                        type: 'multiple-choice',
+                        points: 1,
+                        text: 'Přiřaďte odpovídající tvrzení k souvětí:\n\n„Ctirad vyfásl tříletý flastr, půjde tedy na nějaký čas do báně."',
+                        options: [
+                            { label: 'A) V každé větě souvětí je pouze jedno nespisovné slovo.', value: 'A' },
+                            { label: 'B) V první větě souvětí není žádné nespisovné slovo, ve druhé větě je pouze jedno.', value: 'B' },
+                            { label: 'C) V první větě je pouze jedno nespisovné slovo, ve druhé větě není žádné.', value: 'C' },
+                            { label: 'D) V první větě je pouze jedno nespisovné, ve druhé větě jsou celkem dvě.', value: 'D' },
+                            { label: 'E) V první větě jsou celkem dvě nespisovná slova, ve druhé větě je pouze jedno.', value: 'E', correct: true }
+                        ],
+                        explanation: 'První věta: „vyfásl" (dostal) a „flastr" (trest) = 2 nespisovná slova. Druhá věta: „báně" (vězení) = 1 nespisovné slovo. Odpověď E.'
+                    },
+                    {
+                        id: '15.2',
+                        type: 'multiple-choice',
+                        points: 1,
+                        text: 'Přiřaďte odpovídající tvrzení k souvětí:\n\n„Musím se šprtat, v úterý píšeme z dějáku a zemáku."',
+                        options: [
+                            { label: 'A) V každé větě souvětí je pouze jedno nespisovné slovo.', value: 'A' },
+                            { label: 'B) V první větě souvětí není žádné nespisovné slovo, ve druhé větě je pouze jedno.', value: 'B' },
+                            { label: 'C) V první větě je pouze jedno nespisovné slovo, ve druhé větě není žádné.', value: 'C' },
+                            { label: 'D) V první větě je pouze jedno nespisovné, ve druhé větě jsou celkem dvě.', value: 'D', correct: true },
+                            { label: 'E) V první větě jsou celkem dvě nespisovná slova, ve druhé větě je pouze jedno.', value: 'E' }
+                        ],
+                        explanation: 'První věta: „šprtat" (učit se) = 1 nespisovné. Druhá věta: „dějáku" (dějepisu) a „zemáku" (zeměpisu) = 2 nespisovná. Odpověď D.'
+                    },
+                    {
+                        id: '15.3',
+                        type: 'multiple-choice',
+                        points: 1,
+                        text: 'Přiřaďte odpovídající tvrzení k souvětí:\n\n„Přijdu dnes dýl, musím ještě dojít na poštu."',
+                        options: [
+                            { label: 'A) V každé větě souvětí je pouze jedno nespisovné slovo.', value: 'A' },
+                            { label: 'B) V první větě souvětí není žádné nespisovné slovo, ve druhé větě je pouze jedno.', value: 'B' },
+                            { label: 'C) V první větě je pouze jedno nespisovné slovo, ve druhé větě není žádné.', value: 'C', correct: true },
+                            { label: 'D) V první větě je pouze jedno nespisovné, ve druhé větě jsou celkem dvě.', value: 'D' },
+                            { label: 'E) V první větě jsou celkem dvě nespisovná slova, ve druhé větě je pouze jedno.', value: 'E' }
+                        ],
+                        explanation: 'První věta: „dýl" (déle) = 1 nespisovné slovo. Druhá věta: žádné nespisovné slovo. Odpověď C.'
+                    },
+                    // === ÚLOHA 16 ===
+                    {
+                        id: 16,
+                        type: 'multiple-choice',
+                        points: 1,
+                        text: 'Které z následujících souvětí je napsáno pravopisně správně?',
+                        options: [
+                            { label: 'A) Na poli stály strašáci, kteří odháněli neodbytné ptactvo.', value: 'A' },
+                            { label: 'B) Na poli stáli strašáci, kteří odháněli neodbitné ptactvo.', value: 'B' },
+                            { label: 'C) Na poli stáli strašáci, kteří odháněli neodbytné ptactvo.', value: 'C', correct: true },
+                            { label: 'D) Na poli stáli strašáci, kteří odháněly neodbytné ptactvo.', value: 'D' }
+                        ],
+                        explanation: '„Stáli" – rod mužský životný (strašáci), „neodbytné" – správný pravopis, „kteří odháněli" – shoda. Správná je možnost C.'
+                    },
+                    // === ÚLOHA 17 ===
+                    {
+                        id: '17.1',
+                        type: 'open-answer',
+                        points: 1,
+                        text: 'Napište podstatné jméno, které je v 1. pádě čísla jednotného čtyřslabičné, je příbuzné se slovem VODIT a skloňuje se podle vzoru RŮŽE.',
+                        acceptableAnswers: ['průvodkyně', 'závodnice', 'průvodnice'],
+                        explanation: 'Např. „průvodkyně" – prů-vod-ky-ně (4 slabiky), příbuzné s „vodit", skloňuje se podle vzoru „růže".'
+                    },
+                    {
+                        id: '17.2',
+                        type: 'open-answer',
+                        points: 1,
+                        text: 'Napište přídavné jméno, které je v 1. pádě čísla jednotného čtyřslabičné, je příbuzné se slovem POČÁTEK a skloňuje se podle vzoru JARNÍ.',
+                        acceptableAnswers: ['počáteční', 'počátečný'],
+                        explanation: '„Počáteční" – po-čá-teč-ní (4 slabiky), příbuzné s „počátek", skloňuje se podle vzoru „jarní".'
+                    },
+                    // === ÚLOHA 18 ===
+                    {
+                        id: 18,
+                        type: 'multiple-choice',
+                        points: 1,
+                        text: 'Která z následujících možností nejlépe vystihuje výchozí text?',
+                        context: 'Ta vůně! Ten pocit! Ta chuť! Ano, je to tak! Domácí chlebík! S kuchyňským robotem Pro od Delimana si ho můžete dopřát, kdy se vám zachce. Bude váš za tu nejlepší cenu se slevou 36 %. Tak neváhejte déle! Vyšlehejte si tu nejlepší domácí šlehačku a připravte si spolu ty nejlepší dezerty…',
+                        options: [
+                            { label: 'A) Jde o odborný text, jehož součástí je subjektivní názor na kuchyňského robota.', value: 'A' },
+                            { label: 'B) Jde o odborný text, jehož součástí není subjektivní názor na kuchyňského robota.', value: 'B' },
+                            { label: 'C) Jde o publicistický text, jehož součástí jsou manipulativní prvky.', value: 'C', correct: true },
+                            { label: 'D) Jde o publicistický text, jehož součástí nejsou manipulativní prvky.', value: 'D' }
+                        ],
+                        explanation: 'Text je reklama (publicistický styl) s jasnými manipulativními prvky: superlativy („nejlepší"), citové apely, naléhání („neváhejte"), sleva jako lákadlo.'
+                    },
+                    // === ÚLOHA 19 ===
+                    {
+                        id: 19,
+                        type: 'multiple-choice',
+                        points: 1,
+                        text: 'Které z následujících tvrzení o výchozím textu je pravdivé?',
+                        context: '„Žáci Základní školy T. G. Masaryka v Kutné Hoře obsadili v běžeckém závodě kolem řeky Vrchlice krásné 2. místo."',
+                        options: [
+                            { label: 'A) Výchozí text je zapsán pravopisně správně.', value: 'A', correct: true },
+                            { label: 'B) Ve výchozím textu je pravopisná chyba, správný zápis je „základní školy".', value: 'B' },
+                            { label: 'C) Ve výchozím textu je pravopisná chyba, správný zápis je „Kutné hoře".', value: 'C' },
+                            { label: 'D) Ve výchozím textu je pravopisná chyba, za číslovkou nemá být napsána tečka.', value: 'D' }
+                        ],
+                        explanation: 'Text je zapsán správně. „Základní školy" je velké písmeno jako součást oficiálního názvu školy. „Kutné Hoře" – obě slova velká (vlastní jméno). „2." – řadová číslovka s tečkou je správně.'
+                    },
+                    // === ÚLOHA 20 ===
+                    {
+                        id: 20,
+                        type: 'open-answer',
+                        points: 4,
+                        text: 'Najděte ve výchozím textu čtyři slova zapsaná s pravopisnou chybou a napište je správně.\n\n(Zapište opravená slova oddělená čárkami.)',
+                        context: '„…slyšela jsem kapky vody padající na kamenou podlahu… Srdce mi bušilo, obavy narůstali… Zvuky vydávali maličcí broučci. Vypadali neškodně. To mně uklidnilo… Prý je tam v suterénu zajímavá zbírka hmyzu…"',
+                        acceptableAnswers: ['kamennou, narůstaly, mě, sbírka', 'kamennou narůstaly mě sbírka', 'narůstaly, kamennou, mě, sbírka', 'sbírka, kamennou, narůstaly, mě', 'mě, kamennou, narůstaly, sbírka', 'kamennou, narůstaly, sbírka, mě'],
+                        explanation: 'Chyby: „kamenou" → „kamennou" (dvě n), „narůstali" → „narůstaly" (obavy = ženský rod), „mně" → „mě" (4. pád = mě), „zbírka" → „sbírka" (s na začátku).'
+                    },
+                    // === ÚLOHA 21: Slovesný rod a způsob ===
+                    {
+                        id: '21.1',
+                        type: 'multiple-choice',
+                        points: 1,
+                        text: 'Která věta obsahuje sloveso užité v trpném rodě a v oznamovacím způsobu?',
+                        options: [
+                            { label: 'A) Kéž bych tak jen býval při práci opatrnější!', value: 'A' },
+                            { label: 'B) Zákazníci při nákupu obvykle vybírají zboží podle nejnižší ceny.', value: 'B' },
+                            { label: 'C) Nezapomeňte do záznamového archu vyznačit správnou odpověď.', value: 'C' },
+                            { label: 'D) Ušlý zisk nebude poškozenému nahrazen.', value: 'D', correct: true },
+                            { label: 'E) Navržený model auta by se jen těžko vyráběl.', value: 'E' },
+                            { label: 'F) Podej mi prosím tu knihu.', value: 'F' }
+                        ],
+                        explanation: '„Nebude nahrazen" = trpný rod (opisné pasivum) + oznamovací způsob (indikativ budoucího času).'
+                    },
+                    {
+                        id: '21.2',
+                        type: 'multiple-choice',
+                        points: 1,
+                        text: 'Která věta obsahuje sloveso užité v činném rodě a v oznamovacím způsobu?',
+                        options: [
+                            { label: 'A) Kéž bych tak jen býval při práci opatrnější!', value: 'A' },
+                            { label: 'B) Zákazníci při nákupu obvykle vybírají zboží podle nejnižší ceny.', value: 'B', correct: true },
+                            { label: 'C) Nezapomeňte do záznamového archu vyznačit správnou odpověď.', value: 'C' },
+                            { label: 'D) Ušlý zisk nebude poškozenému nahrazen.', value: 'D' },
+                            { label: 'E) Navržený model auta by se jen těžko vyráběl.', value: 'E' },
+                            { label: 'F) Podej mi prosím tu knihu.', value: 'F' }
+                        ],
+                        explanation: '„Vybírají" = činný rod + oznamovací způsob.'
+                    },
+                    {
+                        id: '21.3',
+                        type: 'multiple-choice',
+                        points: 1,
+                        text: 'Která věta obsahuje sloveso užité v trpném rodě a v podmiňovacím způsobu?',
+                        options: [
+                            { label: 'A) Kéž bych tak jen býval při práci opatrnější!', value: 'A' },
+                            { label: 'B) Zákazníci při nákupu obvykle vybírají zboží podle nejnižší ceny.', value: 'B' },
+                            { label: 'C) Nezapomeňte do záznamového archu vyznačit správnou odpověď.', value: 'C' },
+                            { label: 'D) Ušlý zisk nebude poškozenému nahrazen.', value: 'D' },
+                            { label: 'E) Navržený model auta by se jen těžko vyráběl.', value: 'E', correct: true },
+                            { label: 'F) Podej mi prosím tu knihu.', value: 'F' }
+                        ],
+                        explanation: '„By se vyráběl" = trpný rod (zvratné pasivum) + podmiňovací způsob.'
+                    },
+                    {
+                        id: '21.4',
+                        type: 'multiple-choice',
+                        points: 1,
+                        text: 'Která věta obsahuje sloveso užité v činném rodě a v podmiňovacím způsobu?',
+                        options: [
+                            { label: 'A) Kéž bych tak jen býval při práci opatrnější!', value: 'A', correct: true },
+                            { label: 'B) Zákazníci při nákupu obvykle vybírají zboží podle nejnižší ceny.', value: 'B' },
+                            { label: 'C) Nezapomeňte do záznamového archu vyznačit správnou odpověď.', value: 'C' },
+                            { label: 'D) Ušlý zisk nebude poškozenému nahrazen.', value: 'D' },
+                            { label: 'E) Navržený model auta by se jen těžko vyráběl.', value: 'E' },
+                            { label: 'F) Podej mi prosím tu knihu.', value: 'F' }
+                        ],
+                        explanation: '„Bych býval" = činný rod + podmiňovací způsob minulý (kondicionál minulý).'
+                    },
+                    // === ÚLOHA 22: NASA/Orion ===
+                    {
+                        id: 22,
+                        type: 'multiple-choice',
+                        points: 1,
+                        text: 'Které z následujících tvrzení o podtržené větě je pravdivé?\n\nPodtržená věta: „Přistála na hladině moře poblíž severomexického pobřeží 11. prosince 2022 v 18:40 našeho času."',
+                        options: [
+                            { label: 'A) V této větě se nevyskytuje žádné podstatné jméno užité v 2. pádě.', value: 'A' },
+                            { label: 'B) V této větě se nevyskytuje žádné podstatné jméno užité ve 3. pádě.', value: 'B', correct: true },
+                            { label: 'C) V této větě se nevyskytuje žádné podstatné jméno užité v 6. pádě.', value: 'C' },
+                            { label: 'D) V této větě se nevyskytuje žádné podstatné jméno užité v 7. pádě.', value: 'D' }
+                        ],
+                        explanation: 'Ve větě: „hladině" = 6. pád, „moře" = 2. pád, „pobřeží" = 2. pád, „prosince" = 2. pád, „času" = 2. pád. Žádné podstatné jméno není ve 3. pádě.'
+                    },
+                    // === ÚLOHA 23: A/N o Orionu ===
+                    {
+                        id: '23.1',
+                        type: 'true-false',
+                        points: 1,
+                        text: 'Vyplývá z textu o kosmické lodi Orion jednoznačně:\n„Kosmická loď Orion bezpečně přistála v prosinci 2022 v Atlantickém oceánu."',
+                        options: [
+                            { label: 'A – ano, vyplývá', value: 'A' },
+                            { label: 'N – ne, nevyplývá', value: 'N', correct: true }
+                        ],
+                        explanation: 'Text uvádí, že Orion přistál v Tichém oceánu, nikoli v Atlantickém.'
+                    },
+                    {
+                        id: '23.2',
+                        type: 'true-false',
+                        points: 1,
+                        text: 'Vyplývá z textu o kosmické lodi Orion jednoznačně:\n„Na palubě kosmické lodi Orion nebyla lidská posádka."',
+                        options: [
+                            { label: 'A – ano, vyplývá', value: 'A', correct: true },
+                            { label: 'N – ne, nevyplývá', value: 'N' }
+                        ],
+                        explanation: 'Text říká: „nahradila ji trojice figurín ověšených senzory" – lidská posádka na palubě nebyla.'
+                    },
+                    {
+                        id: '23.3',
+                        type: 'true-false',
+                        points: 1,
+                        text: 'Vyplývá z textu o kosmické lodi Orion jednoznačně:\n„Kosmickou loď Orion vynesla do vesmíru raketa Artemis I."',
+                        options: [
+                            { label: 'A – ano, vyplývá', value: 'A' },
+                            { label: 'N – ne, nevyplývá', value: 'N', correct: true }
+                        ],
+                        explanation: 'Text uvádí, že „Kosmickou loď Orion vynesla do vesmíru raketa SLS". Artemis I je název mise, nikoli rakety.'
+                    },
+                    {
+                        id: '23.4',
+                        type: 'true-false',
+                        points: 1,
+                        text: 'Vyplývá z textu o kosmické lodi Orion jednoznačně:\n„Příští plánovaná mise kosmické lodi Orion bude totožná s misí Artemis I."',
+                        options: [
+                            { label: 'A – ano, vyplývá', value: 'A' },
+                            { label: 'N – ne, nevyplývá', value: 'N', correct: true }
+                        ],
+                        explanation: 'Příští mise poletí po „víceméně stejné dráze", ale „tentokrát s lidskou posádkou" – není tedy totožná.'
+                    },
+                    {
+                        id: 24,
+                        type: 'multiple-choice',
+                        points: 1,
+                        text: 'V kontextu výchozího textu je synonymem slova „senzor" slovo _____ a synonymem slova „momentálně" slovo _____.\n\nKterá dvě slova je nutné doplnit?',
+                        options: [
+                            { label: 'A) čidlo – tehdy', value: 'A' },
+                            { label: 'B) čidlo – nyní', value: 'B', correct: true },
+                            { label: 'C) tlačítko – tehdy', value: 'C' },
+                            { label: 'D) tlačítko – nyní', value: 'D' }
+                        ],
+                        explanation: 'Senzor = čidlo (měřicí zařízení). Momentálně = nyní (v současné době). Správná odpověď je B.'
+                    },
+                    {
+                        id: 25,
+                        type: 'multiple-choice',
+                        points: 1,
+                        text: 'Kterou z následujících možností je nutné doplnit na vynechané místo ve výchozím textu?\n\n„…poletí v roce 2024 Orion znovu po víceméně stejné dráze, _____ kolem Měsíce bez přistání, tentokrát však už s lidskou posádkou."',
+                        options: [
+                            { label: 'A) ale', value: 'A' },
+                            { label: 'B) zároveň však', value: 'B' },
+                            { label: 'C) tedy', value: 'C', correct: true },
+                            { label: 'D) a proto', value: 'D' }
+                        ],
+                        explanation: '„Tedy" vyjadřuje vysvětlení/upřesnění – „po stejné dráze, tedy kolem Měsíce bez přistání". Správná odpověď je C.'
+                    },
+                    // === ÚLOHA 26: Druhy vedlejších vět ===
+                    {
+                        id: '26.1',
+                        type: 'open-answer',
+                        points: 1,
+                        text: 'Určete druh vedlejší věty v souvětí:\n\n„Zajímavým detailem je, že kosmickou loď nešlo z hladiny vyzvednout okamžitě."',
+                        acceptableAnswers: ['podmětná', 'vedlejší věta podmětná', 'věta podmětná'],
+                        explanation: 'Vedlejší věta „že kosmickou loď nešlo z hladiny vyzvednout okamžitě" je vedlejší věta podmětná (Co je zajímavým detailem?).'
+                    },
+                    {
+                        id: '26.2',
+                        type: 'open-answer',
+                        points: 1,
+                        text: 'Určete druh vedlejší věty v souvětí:\n\n„Pokud všechna vyhodnocení dopadnou dobře, poletí v roce 2024 Orion znovu po víceméně stejné dráze."',
+                        acceptableAnswers: ['příslovečná podmínková', 'vedlejší věta příslovečná podmínková', 'podmínková', 'příslovečná podmínková'],
+                        explanation: 'Vedlejší věta „Pokud všechna vyhodnocení dopadnou dobře" je vedlejší věta příslovečná podmínková (Za jaké podmínky poletí?).'
+                    },
+                    // === ÚLOHY 27–29: Meluzína ===
+                    {
+                        id: '27.1',
+                        type: 'true-false',
+                        points: 1,
+                        text: 'Vyplývá z textu o Meluzíně jednoznačně:\n„Meluzína byla zakladatelkou hradu Lusignan."',
+                        options: [
+                            { label: 'A – ano, vyplývá', value: 'A', correct: true },
+                            { label: 'N – ne, nevyplývá', value: 'N' }
+                        ],
+                        explanation: 'Text přímo uvádí: „Tímto tvorem byla právě Meluzína, zakladatelka zmíněného hradu."'
+                    },
+                    {
+                        id: '27.2',
+                        type: 'true-false',
+                        points: 1,
+                        text: 'Vyplývá z textu o Meluzíně jednoznačně:\n„Meluzína nemá zcela zvířecí podobu."',
+                        options: [
+                            { label: 'A – ano, vyplývá', value: 'A', correct: true },
+                            { label: 'N – ne, nevyplývá', value: 'N' }
+                        ],
+                        explanation: 'Text uvádí „polozvířecí podoba" – napůl žena, napůl had. Nemá tedy zcela zvířecí podobu.'
+                    },
+                    {
+                        id: '27.3',
+                        type: 'true-false',
+                        points: 1,
+                        text: 'Vyplývá z textu o Meluzíně jednoznačně:\n„Meluzínino prokletí bylo navždy zlomeno."',
+                        options: [
+                            { label: 'A – ano, vyplývá', value: 'A' },
+                            { label: 'N – ne, nevyplývá', value: 'N', correct: true }
+                        ],
+                        explanation: 'Prokletí zlomeno nebylo – Raimondin nedodržel slib a „zůstala Meluzíně natrvalo její polozvířecí podoba".'
+                    },
+                    {
+                        id: '27.4',
+                        type: 'true-false',
+                        points: 1,
+                        text: 'Vyplývá z textu o Meluzíně jednoznačně:\n„Meluzína se zjevuje příslušníkům jejího rodu v den jejich smrti."',
+                        options: [
+                            { label: 'A – ano, vyplývá', value: 'A' },
+                            { label: 'N – ne, nevyplývá', value: 'N', correct: true }
+                        ],
+                        explanation: 'Text říká, že se zjevuje „vždy tři dny předtím, než někdo z její pokrevní linie skoná" – tedy tři dny PŘED smrtí, ne v den smrti.'
+                    },
+                    {
+                        id: 28,
+                        type: 'multiple-choice',
+                        points: 1,
+                        text: 'Kterou z následujících dvojic slov nelze v kontextu výchozího TEXTU 1 o Meluzíně považovat za antonyma?',
+                        options: [
+                            { label: 'A) konci – začátku', value: 'A' },
+                            { label: 'B) staré – mladé', value: 'B', correct: true },
+                            { label: 'C) mocným – slabým', value: 'C' },
+                            { label: 'D) smrti – života', value: 'D' }
+                        ],
+                        explanation: 'V kontextu textu se „staré" vztahuje k pověsti („staré pověsti"). Antonymem by bylo „nové", nikoli „mladé". „Mladá pověst" nedává v kontextu smysl.'
+                    },
+                    {
+                        id: 29,
+                        type: 'multiple-choice',
+                        points: 1,
+                        text: 'Ve kterém z následujících úseků TEXTU 1 o Meluzíně se nevyskytuje přístavek?\n\n(Přístavek – druh přívlastku, který pojmenovává jiným způsobem totéž, co předchozí větný člen.)',
+                        options: [
+                            { label: 'A) „Nyní si představíme příběh Meluzíny, pramáti rodu Lucemburků."', value: 'A' },
+                            { label: 'B) „Jan z Arrasu, středověký pařížský knihař a literát."', value: 'B' },
+                            { label: 'C) „Tímto tvorem byla právě Meluzína, zakladatelka zmíněného hradu."', value: 'C' },
+                            { label: 'D) „Od té doby se Meluzína zjevuje jako předzvěst smrti."', value: 'D', correct: true }
+                        ],
+                        explanation: 'V možnosti D „jako předzvěst smrti" není přístavek, ale přirovnání/příslovečné určení. V A, B i C se přístavky vyskytují.'
+                    },
+                    // === ÚLOHA 30: Seřazení textu ===
+                    {
+                        id: 30,
+                        type: 'open-answer',
+                        points: 3,
+                        text: 'Seřaďte jednotlivé části textu (A–F) za sebou tak, aby byla dodržena textová návaznost.\n\nNapište správné pořadí písmen (např. ABCDEF).',
+                        context: 'A) Do čisté radosti však ukápla kalná krůpěj smutku. Do paláce vešlo sedm Hathor, sudiček, obstoupily novorozeného, aby mu určily osud.\n\nB) Domníval se, že tohle je celý svět… spatřil zvláštní podívanou. Pouští pospíchal nějaký muž a za ním poskakovalo něco čtyřnohého.\n\nC) Sklonily se nad ním a řekly: „Zahubí tě buď krokodýl, nebo had, anebo pes." …Smutek dolehl na krále.\n\nD) Domu přidělil nejvěrnější služebníky… Princ rostl v odloučenosti od ostatního světa.\n\nE) Před mnoha lety žil v Egyptě král a neměl děti. Dlouho po nich toužil… Splnili mu jeho přání.\n\nF) Musím ho skrýt před trojím nebezpečím… Dal proto svému synovi vystavět vysoký dům v horách pouště.',
+                        acceptableAnswers: ['EACFDB', 'E A C F D B', 'E, A, C, F, D, B'],
+                        explanation: 'Správné pořadí: E (král neměl děti, bohové splnili přání) → A (radost, ale sudičky přišly) → C (věštba: krokodýl, had nebo pes) → F (král chce syna schovat, staví dům) → D (princ roste v odloučenosti) → B (princ spatří muže se psem).'
+                    }
+                ]
+            }
+        };
+
+        // ===== APPLICATION STATE =====
+        let currentTest = null;
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let maxScore = 0;
+        let userAnswers = [];
+        let answered = false;
+
+        // ===== INITIALIZATION =====
+        function init() {
+            renderTestList();
+        }
+
+        function renderTestList() {
+            const testList = document.getElementById('testList');
+            testList.innerHTML = '';
+            
+            for (const [testId, test] of Object.entries(testData)) {
+                const totalPoints = test.questions.reduce((sum, q) => sum + q.points, 0);
+                const btn = document.createElement('button');
+                btn.className = 'test-btn';
+                btn.innerHTML = `
+                    <div>${test.name}</div>
+                    <div class="test-info">${test.questions.length} otázek • ${totalPoints} bodů</div>
+                `;
+                btn.onclick = () => startTest(testId);
+                testList.appendChild(btn);
+            }
+        }
+
+        function startTest(testId) {
+            currentTest = testData[testId];
+            currentQuestionIndex = 0;
+            score = 0;
+            userAnswers = [];
+            answered = false;
+            maxScore = currentTest.questions.reduce((sum, q) => sum + q.points, 0);
+
+            document.getElementById('introScreen').style.display = 'none';
+            document.getElementById('quizScreen').style.display = 'block';
+            document.getElementById('resultsScreen').classList.remove('show');
+
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            const question = currentTest.questions[currentQuestionIndex];
+            answered = false;
+
+            // Update progress
+            document.getElementById('currentQuestion').textContent = currentQuestionIndex + 1;
+            document.getElementById('totalQuestions').textContent = currentTest.questions.length;
+            document.getElementById('currentScore').textContent = score;
+            document.getElementById('maxScore').textContent = maxScore;
+
+            const progress = ((currentQuestionIndex) / currentTest.questions.length) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+
+            // Question
+            document.getElementById('questionText').innerHTML = question.text.replace(/\n/g, '<br>');
+            document.getElementById('pointsBadge').textContent = question.points + ' ' + (question.points === 1 ? 'bod' : question.points <= 4 ? 'body' : 'bodů');
+
+            // Context
+            const contextDiv = document.getElementById('questionContext');
+            if (question.context) {
+                contextDiv.innerHTML = `<div class="question-context">${question.context.replace(/\n/g, '<br>')}</div>`;
+            } else {
+                contextDiv.innerHTML = '';
+            }
+
+            // Clear feedback
+            const feedback = document.getElementById('feedback');
+            feedback.classList.remove('show', 'correct', 'incorrect');
+
+            // Render answer options
+            const answerContainer = document.getElementById('answerContainer');
+            answerContainer.innerHTML = '';
+
+            switch(question.type) {
+                case 'multiple-choice':
+                    renderMultipleChoice(question, answerContainer);
+                    break;
+                case 'true-false':
+                    renderTrueFalse(question, answerContainer);
+                    break;
+                case 'open-answer':
+                    renderOpenAnswer(question, answerContainer);
+                    break;
+            }
+
+            document.getElementById('submitBtn').disabled = false;
+            document.getElementById('submitBtn').textContent = 'Potvrdit odpověď';
+            document.getElementById('submitBtn').onclick = submitAnswer;
+        }
+
+        function renderMultipleChoice(question, container) {
+            const optionsDiv = document.createElement('div');
+            optionsDiv.className = 'options-container';
+
+            question.options.forEach((option, idx) => {
+                const label = document.createElement('label');
+                label.className = 'option';
+
+                const radio = document.createElement('input');
+                radio.type = 'radio';
+                radio.name = 'answer';
+                radio.value = option.value;
+
+                const span = document.createElement('span');
+                span.textContent = option.label;
+
+                label.appendChild(radio);
+                label.appendChild(span);
+
+                label.onclick = () => {
+                    document.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+                    label.classList.add('selected');
+                };
+
+                optionsDiv.appendChild(label);
+            });
+
+            container.appendChild(optionsDiv);
+        }
+
+        function renderTrueFalse(question, container) {
+            const div = document.createElement('div');
+            div.className = 'true-false-container';
+
+            question.options.forEach(option => {
+                const btn = document.createElement('button');
+                btn.className = 'tf-option';
+                btn.textContent = option.label;
+                btn.onclick = () => {
+                    document.querySelectorAll('.tf-option').forEach(b => b.classList.remove('selected'));
+                    btn.classList.add('selected');
+                    btn.dataset.value = option.value;
+                };
+                div.appendChild(btn);
+            });
+
+            container.appendChild(div);
+        }
+
+        function renderOpenAnswer(question, container) {
+            const div = document.createElement('div');
+            div.className = 'open-answer-container';
+
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'open-answer-input';
+            input.placeholder = 'Napiš odpověď...';
+            input.id = 'openAnswer';
+
+            div.appendChild(input);
+            container.appendChild(div);
+        }
+
+        function submitAnswer() {
+            const question = currentTest.questions[currentQuestionIndex];
+            const feedback = document.getElementById('feedback');
+            let isCorrect = false;
+            let selectedAnswer = null;
+
+            switch(question.type) {
+                case 'multiple-choice':
+                    const selected = document.querySelector('input[name="answer"]:checked');
+                    if (!selected) {
+                        alert('Vyber odpověď!');
+                        return;
+                    }
+                    selectedAnswer = selected.value;
+                    isCorrect = question.options.find(opt => opt.value === selectedAnswer)?.correct;
+                    break;
+
+                case 'true-false':
+                    const tfSelected = document.querySelector('.tf-option.selected');
+                    if (!tfSelected) {
+                        alert('Vyber odpověď!');
+                        return;
+                    }
+                    selectedAnswer = tfSelected.dataset.value;
+                    isCorrect = question.options.find(opt => opt.value === selectedAnswer)?.correct;
+                    break;
+
+                case 'open-answer':
+                    const input = document.getElementById('openAnswer');
+                    if (!input.value.trim()) {
+                        alert('Napiš odpověď!');
+                        return;
+                    }
+                    selectedAnswer = input.value.trim().toLowerCase();
+                    const answers = question.acceptableAnswers.map(a => a.toLowerCase());
+                    isCorrect = answers.some(a => a.includes(selectedAnswer) || selectedAnswer.includes(a));
+                    break;
+            }
+
+            // Update score
+            if (isCorrect) {
+                score += question.points;
+            }
+            userAnswers.push({ questionId: question.id, answer: selectedAnswer, correct: isCorrect });
+
+            // Show feedback
+            feedback.classList.add('show');
+            feedback.classList.add(isCorrect ? 'correct' : 'incorrect');
+
+            let html = `<div class="feedback-title">${isCorrect ? '✓ Správně!' : '✗ Chybně!'}</div>`;
+            html += `<div class="feedback-content">`;
+            if (!isCorrect && question.type !== 'open-answer') {
+                const correctOpt = question.options.find(opt => opt.correct);
+                html += `<div class="correct-answer"><strong>Správná odpověď:</strong> ${correctOpt.label}</div>`;
+            }
+            if (question.explanation) {
+                html += `<div class="explanation"><strong>Vysvětlení:</strong> ${question.explanation}</div>`;
+            }
+            html += `</div>`;
+
+            feedback.innerHTML = html;
+
+            answered = true;
+            document.getElementById('submitBtn').textContent = currentQuestionIndex === currentTest.questions.length - 1 ? 'Skončit' : 'Další otázka';
+            document.getElementById('submitBtn').onclick = nextQuestion;
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+
+            if (currentQuestionIndex >= currentTest.questions.length) {
+                showResults();
+            } else {
+                renderQuestion();
+            }
+        }
+
+        function showResults() {
+            document.getElementById('quizScreen').style.display = 'none';
+            document.getElementById('resultsScreen').classList.add('show');
+
+            const correct = userAnswers.filter(a => a.correct).length;
+            const incorrect = userAnswers.filter(a => !a.correct).length;
+            const percentage = Math.round((score / maxScore) * 100);
+
+            document.getElementById('finalScore').textContent = score + ' / ' + maxScore;
+            document.getElementById('correctCount').textContent = correct;
+            document.getElementById('incorrectCount').textContent = incorrect;
+            document.getElementById('successRate').textContent = percentage + '%';
+
+            let message = '';
+            if (percentage >= 90) message = 'Výborně! 🌟 Máš to opravdu zvládnuté!';
+            else if (percentage >= 75) message = 'Dobré! 👍 Chceš si zkusit znovu?';
+            else if (percentage >= 50) message = 'Slušně! 📚 Chceš se něčeho naučit?';
+            else message = 'Pokus se znovu! 💪 Určitě to půjde lépe!';
+
+            document.getElementById('resultMessage').textContent = message;
+        }
+
+        function restartQuiz() {
+            document.getElementById('resultsScreen').classList.remove('show');
+            document.getElementById('quizScreen').style.display = 'none';
+            document.getElementById('introScreen').style.display = 'block';
+            renderTestList();
+        }
+
+        function goBack() {
+            document.getElementById('quizScreen').style.display = 'none';
+            document.getElementById('introScreen').style.display = 'block';
+        }
+
+        // Start
+        init();
+    </script>
+</body>
+</html>
