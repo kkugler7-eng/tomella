@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Přijímačky z češtiny – Přípravný kvíz</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0f0e17;--surface:#1a1929;--surface2:#232238;--accent:#e8c547;--accent2:#ff6b6b;--accent3:#6bcb77;--text:#fffffe;--text-muted:#a7a9be;--border:#2e2d45;--radius:16px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(ellipse at 20% 20%,rgba(232,197,71,.05) 0%,transparent 50%),radial-gradient(ellipse at 80% 80%,rgba(107,203,119,.04) 0%,transparent 50%);animation:bgShift 20s ease-in-out infinite alternate;pointer-events:none;z-index:0}
+@keyframes bgShift{0%{transform:translate(0,0)}100%{transform:translate(2%,2%) rotate(1deg)}}
+.container{max-width:720px;margin:0 auto;padding:20px 16px 60px;position:relative;z-index:1}
+.header{text-align:center;padding:40px 0 32px}
+.badge{display:inline-block;background:rgba(232,197,71,.15);border:1px solid rgba(232,197,71,.3);color:var(--accent);font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;padding:6px 16px;border-radius:100px;margin-bottom:20px}
+h1{font-family:'Playfair Display',serif;font-size:clamp(32px,8vw,52px);font-weight:900;line-height:1.1;margin-bottom:12px}
+h1 em{font-style:italic;color:var(--accent)}
+.header p{color:var(--text-muted);font-size:15px;line-height:1.6;max-width:460px;margin:0 auto}
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:32px 0}
+.stat-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 12px;text-align:center}
+.stat-box .num{font-family:'Playfair Display',serif;font-size:36px;font-weight:900;color:var(--accent);line-height:1}
+.stat-box .lbl{font-size:12px;color:var(--text-muted);margin-top:6px;font-weight:500}
+.categories{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:24px}
+.categories h3{font-size:13px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);margin-bottom:14px}
+.cat-list{display:flex;flex-wrap:wrap;gap:8px}
+.cat-tag{background:var(--surface2);border:1px solid var(--border);border-radius:100px;padding:5px 14px;font-size:13px;color:var(--text-muted)}
+.cat-tag.grammar{border-color:rgba(232,197,71,.4);color:var(--accent)}
+.cat-tag.syntax{border-color:rgba(107,203,119,.4);color:var(--accent3)}
+.cat-tag.literature{border-color:rgba(255,107,107,.4);color:var(--accent2)}
+.cat-tag.vocab{border-color:rgba(100,180,255,.4);color:#64b4ff}
+.cat-tag.spelling{border-color:rgba(200,130,255,.4);color:#c882ff}
+.btn-start{width:100%;background:var(--accent);color:var(--bg);border:none;border-radius:var(--radius);padding:18px 32px;font-family:'DM Sans',sans-serif;font-size:17px;font-weight:700;cursor:pointer;transition:all .2s ease;letter-spacing:.3px}
+.btn-start:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(232,197,71,.3)}
+#quiz-screen{display:none}
+.quiz-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;padding:14px 18px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius)}
+.q-counter{font-size:13px;font-weight:600;color:var(--text-muted)}
+.q-counter span{font-family:'Playfair Display',serif;font-size:20px;color:var(--text);font-weight:900}
+.score-live{font-size:13px;font-weight:600;color:var(--accent3);padding:5px 12px;background:rgba(107,203,119,.1);border-radius:100px}
+.progress-bar{width:100%;height:4px;background:var(--surface2);border-radius:100px;margin-bottom:24px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:100px;transition:width .5s cubic-bezier(.4,0,.2,1)}
+.question-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:16px}
+@keyframes slideUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.q-category{font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:14px;padding:4px 10px;border-radius:100px;display:inline-block}
+.q-category.grammar{background:rgba(232,197,71,.12);color:var(--accent)}
+.q-category.syntax{background:rgba(107,203,119,.12);color:var(--accent3)}
+.q-category.literature{background:rgba(255,107,107,.12);color:var(--accent2)}
+.q-category.vocab{background:rgba(100,180,255,.12);color:#64b4ff}
+.q-category.spelling{background:rgba(200,130,255,.12);color:#c882ff}
+.question-text{font-size:17px;line-height:1.6;font-weight:500}
+.options-list{display:flex;flex-direction:column;gap:10px;margin-top:16px}
+.option-btn{width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:12px;padding:14px 18px;text-align:left;font-family:'DM Sans',sans-serif;font-size:15px;color:var(--text);cursor:pointer;transition:all .18s ease;display:flex;align-items:flex-start;gap:12px;line-height:1.5}
+.option-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(232,197,71,.06);transform:translateX(3px)}
+.option-letter{min-width:26px;height:26px;border-radius:50%;background:var(--border);color:var(--text-muted);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;transition:all .18s ease}
+.option-btn:hover:not(:disabled) .option-letter{background:var(--accent);color:var(--bg)}
+.option-btn.correct{border-color:var(--accent3);background:rgba(107,203,119,.1)}
+.option-btn.correct .option-letter{background:var(--accent3);color:var(--bg)}
+.option-btn.wrong{border-color:var(--accent2);background:rgba(255,107,107,.1)}
+.option-btn.wrong .option-letter{background:var(--accent2);color:#fff}
+.option-btn:disabled{cursor:default}
+.explanation-box{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:14px 18px;margin-top:14px;font-size:14px;color:var(--text-muted);line-height:1.6;display:none}
+.explanation-box.show{display:block;animation:fadeIn .3s ease}
+.explanation-box strong{color:var(--text)}
+.next-btn{width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--radius);padding:16px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;color:var(--text);cursor:pointer;transition:all .2s ease;display:none;margin-top:4px}
+.next-btn.show{display:block;animation:fadeIn .3s ease}
+.next-btn:hover{border-color:var(--accent);color:var(--accent)}
+#result-screen{display:none;text-align:center}
+.result-hero{padding:40px 0 30px}
+.score-circle{width:160px;height:160px;border-radius:50%;border:4px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto 24px;position:relative;background:var(--surface)}
+.score-num-big{font-family:'Playfair Display',serif;font-size:42px;font-weight:900;line-height:1}
+.score-pct-label{font-size:13px;color:var(--text-muted);font-weight:500}
+.result-title{font-family:'Playfair Display',serif;font-size:28px;font-weight:900;margin-bottom:8px}
+.result-sub{color:var(--text-muted);font-size:15px;margin-bottom:24px;line-height:1.5;max-width:420px;margin-left:auto;margin-right:auto}
+.result-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:28px}
+.result-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 12px}
+.result-box .rnum{font-family:'Playfair Display',serif;font-size:32px;font-weight:900;line-height:1}
+.result-box .rlbl{font-size:12px;color:var(--text-muted);margin-top:5px}
+.result-box.rcorrect .rnum{color:var(--accent3)}
+.result-box.rwrong .rnum{color:var(--accent2)}
+.result-box.rtotal .rnum{color:var(--accent)}
+.cermat-bar{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;margin-bottom:24px;text-align:left}
+.cermat-bar h4{font-size:13px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);margin-bottom:12px}
+.grade-bar{display:flex;border-radius:8px;overflow:hidden;height:30px;font-size:11px;font-weight:700;margin-bottom:10px}
+.grade-seg{display:flex;align-items:center;justify-content:center;flex:1;color:var(--bg);white-space:nowrap}
+.grade-seg.poor{background:var(--accent2)}
+.grade-seg.mid{background:#f4a337}
+.grade-seg.good{background:#6bcb77}
+.grade-seg.great{background:#4ea8de}
+.grade-seg.excel{background:var(--accent)}
+.marker-wrap{position:relative;height:22px}
+.pct-marker{position:absolute;top:0;transform:translateX(-50%);font-size:12px;font-weight:700;color:var(--accent);white-space:nowrap;text-align:center}
+.pct-marker::before{content:'▲';display:block}
+.grade-text-el{font-size:14px;color:var(--text-muted);line-height:1.5;margin-top:4px}
+.btn-restart{width:100%;background:var(--accent);color:var(--bg);border:none;border-radius:var(--radius);padding:18px 32px;font-family:'DM Sans',sans-serif;font-size:17px;font-weight:700;cursor:pointer;transition:all .2s ease;margin-bottom:12px}
+.btn-restart:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(232,197,71,.3)}
+.btn-second{width:100%;background:transparent;border:1.5px solid var(--border);border-radius:var(--radius);padding:16px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;color:var(--text-muted);cursor:pointer;transition:all .2s ease}
+.btn-second:hover{border-color:var(--text-muted);color:var(--text)}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- START SCREEN -->
+<div id="start-screen">
+  <div class="header">
+    <div class="badge">CERMAT JPZ 2025/2026</div>
+    <h1>Přijímačky<br>z <em>češtiny</em></h1>
+    <p>Procvičuj otázky ze všech klíčových oblastí – přesně jak je zadává CERMAT u jednotné přijímací zkoušky.</p>
+  </div>
+  <div class="stats-row">
+    <div class="stat-box"><div class="num">160</div><div class="lbl">otázek v databázi</div></div>
+    <div class="stat-box"><div class="num">20</div><div class="lbl">otázek v kole</div></div>
+    <div class="stat-box"><div class="num">5</div><div class="lbl">oblastí</div></div>
+  </div>
+  <div class="categories">
+    <h3>Co kvíz pokrývá</h3>
+    <div class="cat-list">
+      <span class="cat-tag grammar">Mluvnice</span>
+      <span class="cat-tag syntax">Větná skladba</span>
+      <span class="cat-tag spelling">Pravopis</span>
+      <span class="cat-tag vocab">Slovní zásoba</span>
+      <span class="cat-tag literature">Literatura</span>
+      <span class="cat-tag vocab">Slohové útvary</span>
+      <span class="cat-tag grammar">Tvarosloví</span>
+      <span class="cat-tag syntax">Souvětí</span>
+    </div>
+  </div>
+  <button class="btn-start" onclick="startQuiz()">Spustit kvíz →</button>
+</div>
+
+<!-- QUIZ SCREEN -->
+<div id="quiz-screen">
+  <div class="quiz-header">
+    <div class="q-counter">Otázka <span id="q-num">1</span> / 20</div>
+    <div class="score-live" id="score-live">0 správně</div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+  <div class="question-card" id="question-card">
+    <div class="q-category grammar" id="q-category">Mluvnice</div>
+    <div class="question-text" id="question-text"></div>
+    <div class="explanation-box" id="explanation-box"></div>
+  </div>
+  <div class="options-list" id="options-list"></div>
+  <button class="next-btn" id="next-btn" onclick="nextQuestion()">Další otázka →</button>
+</div>
+
+<!-- RESULT SCREEN -->
+<div id="result-screen">
+  <div class="result-hero">
+    <div class="score-circle">
+      <div class="score-num-big" id="score-pct-big">0%</div>
+      <div class="score-pct-label">úspěšnost</div>
+    </div>
+    <div class="result-title" id="result-title">Výsledek</div>
+    <div class="result-sub" id="result-sub"></div>
+  </div>
+  <div class="result-grid">
+    <div class="result-box rcorrect"><div class="rnum" id="res-correct">0</div><div class="rlbl">správně</div></div>
+    <div class="result-box rwrong"><div class="rnum" id="res-wrong">0</div><div class="rlbl">špatně</div></div>
+    <div class="result-box rtotal"><div class="rnum">20</div><div class="rlbl">celkem</div></div>
+  </div>
+  <div class="cermat-bar">
+    <h4>Orientační hodnocení CERMAT</h4>
+    <div class="grade-bar">
+      <div class="grade-seg poor">0–40%</div>
+      <div class="grade-seg mid">41–55%</div>
+      <div class="grade-seg good">56–70%</div>
+      <div class="grade-seg great">71–85%</div>
+      <div class="grade-seg excel">86–100%</div>
+    </div>
+    <div class="marker-wrap"><div class="pct-marker" id="pct-marker" style="left:50%"></div></div>
+    <div class="grade-text-el" id="grade-text"></div>
+  </div>
+  <button class="btn-restart" onclick="startQuiz()">Nové kolo →</button>
+  <button class="btn-second" onclick="showStart()">← Zpět na úvod</button>
+</div>
+
+</div><!-- /container -->
+<script>
+const allQuestions = [
+// ===== MLUVNICE / SLOVNÍ DRUHY =====
+{cat:'grammar',text:'Kterým slovním druhem je slovo „<b>rychle</b>“ ve větě: „Auto jede rychle.“?',options:['příslovce','přídavné jméno','podstatné jméno','citoslovce'],correct:0,expl:'„Rychle“ vyjadřuje způsob děje (jak?), tedy je příslovce.'},
+{cat:'grammar',text:'Určete slovní druh slova „<b>třetí</b>“ ve větě: „Nastoupil jsem do třetího vagonu.“',options:['číslovka řadová','číslovka základní','přídavné jméno','zájmeno'],correct:0,expl:'Třetí = číslovka řadová (udává pořadí: první, druhý, třetí…).'},
+{cat:'grammar',text:'Které slovo je <b>přídavné jméno přivlastňovací</b>?',options:['otcův kabát','dřevěný dům','vyšší cena','rychlý vlak'],correct:0,expl:'Přídavná jména přivlastňovací vyjadřují přivlastnění (čí?). Otcův = přivlastňovací.'},
+{cat:'grammar',text:'Ve větě „<b>Ona</b> přišla pozdě.“ je slovo „ona“ jakým slovním druhem?',options:['zájmeno osobní','zájmeno přivlastňovací','zájmeno ukazovací','zájmeno neurčité'],correct:0,expl:'Ona/on/já/ty = zájmena osobní.'},
+{cat:'grammar',text:'Které z následujících slov je <b>podstatné jméno abstraktní</b>?',options:['láska','kniha','stůl','pes'],correct:0,expl:'Abstraktní podstatná jména označují pojmy, které nelze smysly vnímat (láska, svoboda, radost).'},
+{cat:'grammar',text:'Co je to <b>sloveso modální</b>? Vyberte příklad.',options:['musím studovat','studoval jsem','studuji denně','by se studovalo'],correct:0,expl:'Modální slovesa vyjadřují možnost, nutnost, přání (muset, moci, smět, chtít + infinitiv).'},
+{cat:'grammar',text:'Určete rod podstatného jména „<b>rajče</b>“.',options:['střední rod','mužský rod neživotný','ženský rod','mužský rod životný'],correct:0,expl:'Rajče – to rajče, toho rajčete = rod střední.'},
+{cat:'grammar',text:'Slovo „<b>chůze</b>“ patří ke vzoru:',options:['růže','žena','píseň','kost'],correct:0,expl:'Chůze – té chůze = vzor RŮŽE (ženský rod, měkký vzor).'},
+{cat:'grammar',text:'Které slovo je <b>citoslovce</b>?',options:['Ach!','Jít','Rychle','Malý'],correct:0,expl:'Citoslovce (interjekce) vyjadřují city nebo zvuky: ach, och, hej, au, bum.'},
+{cat:'grammar',text:'Jak se změní sloveso „sněžit“ ve 3. osobě jednotného čísla přítomného času?',options:['sněží','sněžejí','sněžují','sněžíjí'],correct:0,expl:'Sněžit → sněží (neosobní sloveso, III. třída, vzor prosit).'},
+{cat:'grammar',text:'Která z možností obsahuje <b>sloveso v rozkazovacím způsobu</b>?',options:['Sedni si!','Sedím.','Seděl bych.','Budu sedět.'],correct:0,expl:'Rozkazovací způsob (imperativ) vyjadřuje rozkaz nebo výzvu. „Sedni!“ = 2. os. j.č.'},
+{cat:'grammar',text:'Jaký slovní druh je slovo „<b>přes</b>“ ve větě: „Letěl přes hory.“?',options:['předložka','příslovce','spojka','částice'],correct:0,expl:'Předložky (prepozice) vyjadřují vztahy mezi větnými členy. „Přes“ je předložka s 4. pádem.'},
+{cat:'grammar',text:'Číslovka „<b>pět set tisíc</b>“ je číslovka:',options:['základní','řadová','druhová','násobná'],correct:0,expl:'Číslovky základní odpovídají na otázku „Kolik?“ (pět, sto, tisíc).'},
+{cat:'grammar',text:'Přídavné jméno „<b>vlčí</b>“ (vlčí doupě) je:',options:['přivlastňovací (čí doupě? – vlkovo)','jakostní (jaký? – lesní, velký)','vztahové (z čeho? – dřevěný, jarní)','druhové (jaký druh? – sokolí mák)'],correct:0,expl:'Vlčí = přídavné jméno přivlastňovací (čí doupě? – vlčí = vlkovo). Skloňuje se podle vzoru jarní: vlčího, vlčímu, vlčím. Na ZŠ se přivlastňovací přídavná jména poznávají otázkou čí? (otcův, matčin, vlčí).'},
+// ===== PRAVOPIS =====
+{cat:'spelling',text:'Vyberte větu s <b>pravopisnou chybou</b>:',options:['Hrají fotbal na hřiští.','Babička upekla koláče.','V sobotu pojedeme na výlet.','Jestliže přijde, zavolám ti.'],correct:0,expl:'Správně „na hřišti“ (6. pád, měkká přípona -i), ne „hřiští“.'},
+{cat:'spelling',text:'Jak správně napsat: „Chlap_ci hráli fotbal.“?',options:['Chlapci','Chlapcy','Chlapce','Chlapci '],correct:0,expl:'Chlapec → chlapci. V 1. pádě množného čísla životných mužských jmen se po c píše měkké -i (chlapci, hoši, žáci).'},
+{cat:'spelling',text:'Vyberte správně napsané příslovce od slova „nízký“:',options:['nízce','niske','nízky','nísky'],correct:0,expl:'Nízký → nízce (příslovce od přídavných jmen na -ký se tvoří příponou -ce).'},
+{cat:'spelling',text:'Vyberte větu, kde jsou čárky napsány <b>správně</b>:',options:['Zpíval, tančil a smál se.','Přišel, a čekal.','Koupil jsem mléko, a máslo.','Jana a, Petr přišli.'],correct:0,expl:'Čárka se nepíše před spojkou „a“ v jednoduchém výčtu bez opakující se spojky.'},
+{cat:'spelling',text:'Jak napíšeme „budova Národního _ivadla“?',options:['Divadla','divadla','Divadel','divadel'],correct:0,expl:'Vlastní jméno instituce (Národní divadlo) se píše s velkým písmenem.'},
+{cat:'spelling',text:'Vyberte větu s <b>chybnou interpunkcí</b>:',options:['Přišel a, sedl si.','Ač pršelo, šli jsme ven.','Pršelo, a tak jsme zůstali doma.','Nevím, jestli přijde.'],correct:0,expl:'Čárka se nepíše mezi přísudky spojenými „a“ ve větě jednoduché s jedním podmětem.'},
+{cat:'spelling',text:'Vyberte správně napsané slovo:',options:['příliš','přilíš','přiliš','přílíš'],correct:0,expl:'Příliš – správně s „í“ po „p“. Časté chyby: přilíš, přiliš.'},
+{cat:'spelling',text:'Jak správně napsat přídavné jméno? „Jedeme na _______ cestu.“',options:['zahraniční','zahranicní','zahranični','zahranycní'],correct:0,expl:'Zahraniční – vzor „jarní“, 4. pád j.č. ženského rodu = zahraniční (délka nad -í zůstává).'},
+{cat:'spelling',text:'Vyberte větu se správně napsanou velkou/malou literou:',options:['Přihlásil se na Gymnázium Jana Nerudy.','Přihlásil se na gymnázium Jana Nerudy.','Přihlásil se na gymnázium jana nerudy.','Přihlásil se na Gymnázium jana Nerudy.'],correct:0,expl:'Oficielní název školy = vlastní jméno → Gymnázium Jana Nerudy (G, J i N velká písmena).'},
+{cat:'spelling',text:'Jak se správně píše slovo „<b>bezprostřední</b>“?',options:['bezprostřední','besprostřední','bezprostredni','bězprostřední'],correct:0,expl:'Bezprostřední – předpona bez- + prostřední. Před souhláskou p zůstává bez-.'},
+{cat:'spelling',text:'Jak se píší zájmena zdvořilostního vykání (Vy, Vám, Vaše…) v <b>oficiálním dopise nebo e-mailu</b>?',options:['Velké V: Vám, Vás, Vaše','Malé v: vám, vás, vaše','Libovolně – obojí je vždy správné','Pouze v záhlaví velkým V, jinde malým'],correct:0,expl:'V oficiální korespondenci (dopis, e-mail) se zájmena zdvořilostního vykání píší s velkým V (Vám, Vás, Vaše, Vy) jako projev úcty. V běžném textu (beletrie, noviny) se používá malé v.'},
+{cat:'spelling',text:'Vyberte větu bez chyby:',options:['Bylo to přepřesné měření.','Bylo to přes-přesné měření.','Bylo to přes přesné měření.','Bylo to přespřes né měření.'],correct:0,expl:'Složeniny s přes-/pře- se píší dohromady: přepřesný, přesladký, přecitlivělý.'},
+// ===== VĚTNÁ SKLADBA =====
+{cat:'syntax',text:'Určete větný člen: „<b>Jana</b> četla knihu.“ – jaký větný člen je Jana?',options:['podmět','přísudek','předmět','příslovečné určení'],correct:0,expl:'Podmět (subjekt) označuje konatele děje. Odpovídá na otázku „Kdo/co?“'},
+{cat:'syntax',text:'Ve větě „Petr pil <b>kávu</b>.“ je slovo „kávu“ jakým větným členem?',options:['předmět','podmět','přísudek','přívlastek'],correct:0,expl:'Předmět (objekt) rozvíjí sloveso, odpovídá na otázky pádů (kromě 1. a 5.).'},
+{cat:'syntax',text:'Jaký druh přísudku je v souvětí: „Moře bylo <b>rozbouřené</b>.“?',options:['přísudek jmenný se sponou','přísudek slovesný','přísudek holý','přísudek jmenný beze spony'],correct:0,expl:'Jmenný přísudek se sponou = spona (být, stát se...) + jmenná část (přídavné jméno).'},
+{cat:'syntax',text:'Určete druh vedlejší věty: „Věděl jsem, <b>že přijde</b>.“',options:['vedlejší věta předmětná','vedlejší věta podmětná','vedlejší věta přívlastková','vedlejší věta příslovečná'],correct:0,expl:'Vedlejší věta předmětná odpovídá na otázky pádů (Věděl jsem co? – že přijde).'},
+{cat:'syntax',text:'Jak se nazývá druh souvětí: „Přišel, <b>protože</b> chtěl pomoct.“?',options:['souvětí podřadné','souvětí souřadné','věta jednoduchá','souvětí smíšené'],correct:0,expl:'Souvětí podřadné má větu hlavní a vedlejší spojenou podřadicí spojkou (protože, aby, když…).'},
+{cat:'syntax',text:'Jaký poměr vyjadřuje spojka v souvětí: „Buď pojď, <b>nebo</b> zůstaň doma.“?',options:['poměr vylučovací','poměr slučovací','poměr odporovací','poměr stupňovací'],correct:0,expl:'Buď – nebo = poměr vylučovací (vylučují se dvě možnosti).'},
+{cat:'syntax',text:'Ve větě „<b>Unaveně</b> si sedla na lavičku.“ je „unaveně“ jakým větným členem?',options:['příslovečné určení způsobu','přívlastek shodný','doplněk','předmět'],correct:0,expl:'Příslovečné určení způsobu odpovídá na otázku „jak?“. Unaveně = jak si sedla.'},
+{cat:'syntax',text:'Souvětí „<b>Ačkoli</b> pršelo, šli jsme ven.“ vyjadřuje:',options:['poměr přípustkový','poměr příčinný','poměr účelový','poměr podmínkový'],correct:0,expl:'Spojky ačkoli, přestože, i když uvozují věty přípustkové.'},
+{cat:'syntax',text:'Věta „<b>Přijel jsem.</b>“ má podmět:',options:['nevyjádřený (obsažený ve slovese)','vyjádřený – já','chybějící','všeobecný'],correct:0,expl:'Podmět „já“ je nevyjádřen, je obsažen v osobě slovesa (1.os.j.č.).'},
+{cat:'syntax',text:'Vedlejší věta přívlastková odpovídá na otázky:',options:['který? jaký? čí?','kdo? co?','kde? kdy? jak?','proč? za jakým účelem?'],correct:0,expl:'Přívlastková vedlejší věta rozvíjí podstatné jméno: „Dům, který byl starý.“'},
+{cat:'syntax',text:'Co je to <b>přívlastek volný</b>? Vyberte příklad.',options:['Náš učitel, unavený po dlouhém dni, si sedl.','Unavený učitel si sedl.','Učitel si sedl unavený.','Sedl si náš učitel.'],correct:0,expl:'Volný přívlastek je oddělen čárkami a lze ho z věty vynechat bez ztráty smyslu.'},
+{cat:'syntax',text:'Určete základní skladební dvojici ve větě: „<b>Moudrá Tereza zpívala tichounce.</b>“',options:['Tereza zpívala','Moudrá Tereza','tichounce zpívala','Moudrá zpívala'],correct:0,expl:'Základní skladební dvojice = podmět + přísudek: Tereza – zpívala.'},
+{cat:'syntax',text:'Co je <b>příslovečné určení příčiny</b>? Vyberte větu s ním:',options:['Plakal radostí.','Plakal tiše.','Plakal doma.','Plakal celý den.'],correct:0,expl:'Příslovečné určení příčiny odpovídá na otázku „Proč? Z jakého důvodu?“ – radostí = z radosti.'},
+{cat:'syntax',text:'Vyberte větu s <b>přívlastkem neshodným</b>:',options:['Dům ze dřeva byl prodán.','Dřevěný dům byl prodán.','Starý dům byl prodán.','Prodaný dům stojí na kopci.'],correct:0,expl:'Přívlastek neshodný se neshoduje v rodě, čísle a pádu s řídícím substantivem. „Ze dřeva“ = neshodný.'},
+{cat:'syntax',text:'Poměr „Nepřišel, <b>ale</b> zavolal.“ vyjadřuje:',options:['poměr odporovací','poměr slučovací','poměr stupňovací','poměr příčinný'],correct:0,expl:'Spojky „ale, avšak, nýbrž“ vyjadřují odporovací poměr.'},
+{cat:'syntax',text:'Vedlejší věta podmínek je uvozena spojkou:',options:['jestliže / pokud / kdyby','protože / jelikož','aby / ať','ačkoli / přestože'],correct:0,expl:'Podmínková vedlejší věta: jestliže, pokud, kdyby, -li.'},
+// ===== SLOVNÍ ZÁSOBA / SLOHOVÁ VÝCHOVA =====
+{cat:'vocab',text:'Co jsou <b>synonyma</b>? Vyberte dvojici synonym.',options:['rychlý – spěšný','rychlý – pomalý','rychlý – velký','rychlý – tichý'],correct:0,expl:'Synonyma jsou slova stejného nebo podobného významu (rychlý = spěšný, chvatný).'},
+{cat:'vocab',text:'Vyberte dvojici <b>antonym</b> (slov opačného významu):',options:['radost – smutek','radost – štěstí','radost – veselí','radost – zájem'],correct:0,expl:'Antonyma = slova protikladného významu: radost × smutek.'},
+{cat:'vocab',text:'Slovo „<b>pilot</b>“ je v češtině slovo:',options:['přejaté z cizích jazyků','staré české','zdrobnělina','složenina'],correct:0,expl:'Přejatá slova přicházejí z jiných jazyků (pilot z francouzštiny/angličtiny).'},
+{cat:'vocab',text:'Co je to <b>homonymum</b>? Vyberte příklad.',options:['Kohout (pták) × kohout (vodovodní)','Rychlý × pomalý','Pes × kočka','Radost × smutek'],correct:0,expl:'Homonyma jsou slova stejně znějící a psaná, ale různého významu.'},
+{cat:'vocab',text:'Slovo „<b>domeček</b>“ je od slova „dům“ odvozeno:',options:['zdrobněním','složením','zkratkou','přejímáním'],correct:0,expl:'Zdrobnělina = slovo odvozené zdrobňující příponou (-ek, -ík, -ínek, -ička…).'},
+{cat:'vocab',text:'Jak nazýváme nadřazený pojem ke skupině „tygr, lev, gepard“?',options:['šelmy','zvířata Afriky','kočkovité šelmy','masožravci'],correct:0,expl:'Nadřazený pojem (hyperonymum) zahrnuje všechny podřazené pojmy.'},
+{cat:'vocab',text:'Co je to <b>slang</b>?',options:['hovorová mluva určité skupiny lidí','archaismus','básnický obrat','přejatý výraz'],correct:0,expl:'Slang = nespisovná vrstva jazyka charakteristická pro určitou sociální skupinu.'},
+{cat:'vocab',text:'Slova „předseda, předmluva, předměstí“ mají společnou:',options:['předponu „před-“','příponu','kořen','zakončení'],correct:0,expl:'Předpona (prefix) se připojuje před základ slova. Před- = nacházející se před.'},
+{cat:'vocab',text:'Vyberte příklad <b>přeneseného pojmenování</b>:',options:['Moře zlatých klasů se vlnilo.','Vlnilo se jako moře.','Pole bylo zlaté.','Obilí se třpytilo.'],correct:0,expl:'Metafora = přenesení pojmenování na základě podobnosti. „Moře klasů“ – klasy jako mořské vlny.'},
+{cat:'vocab',text:'Co je to <b>archaismus</b>? Vyberte příklad archaického výrazu.',options:['rek (= hrdina, bojovník)','automobil','smartphone','notebook'],correct:0,expl:'Archaismus = zastaralé slovo, které se v běžné řeči přestalo používat (rek, žalář, tvar ve smyslu tvář, meč ve smyslu zbraň). Slovo „zrak“ naopak stále aktivně používáme.'},
+{cat:'vocab',text:'Jaký slohový útvar slouží k popisu osoby zevnitř i zvenku?',options:['charakteristika','líčení','úvaha','životopis'],correct:0,expl:'Charakteristika popisuje vnější i vnitřní vlastnosti osoby (výzor, povahu, chování, zájmy).'},
+{cat:'vocab',text:'Přísloví „Co na srdci, to na jazyku“ vyjadřuje:',options:['upřímnost','tajnůstkářství','chytrost','trpělivost'],correct:0,expl:'Přísloví vyjadřuje životní moudrost. „Co na srdci, to na jazyku“ = říkám, co si myslím.'},
+{cat:'vocab',text:'Co znamená slovní spojení „mluvit do větru“?',options:['mluvit zbytečně','mluvit nahlas','mluvit pomalu','mluvit tiše'],correct:0,expl:'Frazém „mluvit do větru“ = říkat věci, které nikdo nevnímá.'},
+{cat:'vocab',text:'Co je to <b>neologismus</b>?',options:['nové slovo, které vzniklo nedávno','staré zastaralé slovo','přejaté slovo','odborný termín'],correct:0,expl:'Neologismus = nové slovo jako odpověď na nové jevy (selfie, streaming, hashtag).'},
+{cat:'vocab',text:'Vyberte příklad <b>metafory</b>:',options:['Moře zlatých klasů se vlnilo.','Vlnilo se jako moře.','Pole bylo zlaté.','Klasy se třpytily.'],correct:0,expl:'Metafora = obrazné přenesení (Moře klasů – klasy jako moře). Přirovnání používá „jako“.'},
+{cat:'vocab',text:'Co je typické pro <b>reportáž</b> jako slohový útvar?',options:['živé líčení události z pohledu účastníka','objektivní vědecký popis','vyjádření osobního názoru','fikce a umělecký příběh'],correct:0,expl:'Reportáž = publicistický útvar zachycující události živě, autenticky, z pohledu přítomného pozorovatele.'},
+{cat:'vocab',text:'<b>Fejeton</b> je:',options:['krátký novinový útvar s humoristickým nebo ironickým náhledem','vědecký článek','dramatická scéna','lyrickoepická báseň'],correct:0,expl:'Fejeton (z fr. feuilleton) = krátká novinová úvaha s osobitým nebo ironickým pohledem.'},
+{cat:'vocab',text:'Co je charakteristickým rysem <b>vypravování</b>?',options:['děj, napětí, chronologická struktura','popis vlastností','vyjádření názoru','odborné vysvětlení'],correct:0,expl:'Vypravování = slohový útvar s dějem, napětím, postavami a chronologickým řazením.'},
+{cat:'vocab',text:'Vyberte příklad <b>odborného stylu</b>:',options:['Teplotní výkyvy způsobují termální expanzi materiálů.','Teplo dělá věcem to, že se roztahují.','Horko rozhoduje o všem.','Co není horko, to není studeno.'],correct:0,expl:'Odborný styl = přesná terminologie, neutrální tón, věcnost.'},
+{cat:'vocab',text:'Přirovnání „rychlý jako blesk“ je příkladem:',options:['přirovnání (komparace)','metafory','metonymie','personifikace'],correct:0,expl:'Přirovnání = přímé přirovnání dvou věcí pomocí „jako, podobný jako“.'},
+{cat:'vocab',text:'Co je to <b>rčení</b> (frazém)?',options:['ustálené slovní spojení s přeneseným významem','sloveso v rozkazovacím způsobu','zastaralé slovo','slangový výraz'],correct:0,expl:'Frazémy = ustálená slovní spojení: mít máslo na hlavě, hrát si na schovávanou.'},
+// ===== LITERATURA =====
+{cat:'literature',text:'Kdo je autorem románu <b>Babička</b>?',options:['Božena Němcová','Karel Hynek Mácha','Jan Neruda','Alois Jirásek'],correct:0,expl:'Babička (1855) – Božena Němcová. Román popisuje venkovský život a postavu babičky.'},
+{cat:'literature',text:'Jaký literární druh je <b>Máchův Máj</b>?',options:['lyrickoepická báseň','román','povídka','drama'],correct:0,expl:'Máj (1836) – Karel Hynek Mácha. Lyrickoepická skladba kombinuje lyriku i epiku.'},
+{cat:'literature',text:'Jak se nazývá opakování stejného zvuku na konci veršů?',options:['rým','rytmus','metrum','aliterace'],correct:0,expl:'Rým = shoda zvuků na konci veršů. Rytmus = pravidelné střídání přízvučných/nepřízvučných slabik.'},
+{cat:'literature',text:'Kdo napsal <b>Alici v říši divů</b>?',options:['Lewis Carroll','Charles Dickens','Mark Twain','Jules Verne'],correct:0,expl:'Alice\'s Adventures in Wonderland (1865) napsal britský spisovatel Lewis Carroll.'},
+{cat:'literature',text:'Jak se nazývá prozaický útvar kratší než román, delší než povídka?',options:['novela','fejeton','reportáž','legenda'],correct:0,expl:'Novela = kratší prozaické dílo s jednou hlavní zápletkou a ostrým závěrem.'},
+{cat:'literature',text:'<b>Staré pověsti české</b> napsal:',options:['Alois Jirásek','Karel Čapek','Jan Neruda','Jaroslav Hašek'],correct:0,expl:'Staré pověsti české (1894) – Alois Jirásek. Zpracoval pověsti o Krokovi, Libuši, Přemyslovi…'},
+{cat:'literature',text:'Co je to <b>epiteton</b>?',options:['básnický přívlastek','přirovnání','zvolání','opakování'],correct:0,expl:'Epiteton = básnický přívlastek zdůrazňující vlastnost (modré nebe, zlaté slunce).'},
+{cat:'literature',text:'Jaký literární termín označuje přisouzení lidských vlastností neživým věcem?',options:['personifikace','metafora','metonymie','přirovnání'],correct:0,expl:'Personifikace (zosobnění) = přisouzení lidských vlastností přírodě nebo věcem.'},
+{cat:'literature',text:'<b>Osudy dobrého vojáka Švejka</b> jsou románem:',options:['satirickým','romantickým','gotickým','sci-fi'],correct:0,expl:'Jaroslav Hašek v Osudech dobrého vojáka Švejka satiricky kritizuje byrokratismus a nesmyslnost války. Dílo zůstalo nedokončeno, Hašek zemřel roku 1923.'},
+{cat:'literature',text:'Co je to <b>er-forma</b> vyprávění?',options:['vypravěč ve 3. osobě','vypravěč v 1. osobě','dialog postav','monolog'],correct:0,expl:'Er-forma (er = on) = vypravěč mluví ve třetí osobě. Ich-forma = vypravěč v 1. osobě.'},
+{cat:'literature',text:'Kdo je autorem pohádky <b>Zlatovláska</b>?',options:['Karel Jaromír Erben','Božena Němcová','Jan Neruda','Alois Jirásek'],correct:0,expl:'Karel Jaromír Erben sbíral a zpracovával lidové pohádky. Zlatovláska je jednou z jeho Pohádek (1865). Erben je také autorem pohádky Tři zlaté vlasy děda Vševěda.'},
+{cat:'literature',text:'Jak se nazývá přímé vyjádření citů autora v básni, bez děje?',options:['lyrika','epika','drama','komiks'],correct:0,expl:'Lyrika = vyjádření subjektivních citů a nálad. Epika = dílo s dějem. Drama = pro divadlo.'},
+{cat:'literature',text:'Jaký druh rýmu je ve schématu ABAB?',options:['střídavý','sdružený','obkročný','postupný'],correct:0,expl:'ABAB = střídavý rým. AABB = sdružený rým. ABBA = obkročný rým.'},
+{cat:'literature',text:'Který z autorů patří do <b>národního obrození</b>?',options:['Josef Jungmann','Karel Čapek','Bohumil Hrabal','Ota Pavel'],correct:0,expl:'Josef Jungmann (1773–1847) = významný představitel národního obrození, autor česko-německého slovníku.'},
+{cat:'literature',text:'Jaký literární žánr je <b>bajka</b>?',options:['krátký příběh s morálním ponaučením','lyrickoepická báseň','divadelní hra','epický román'],correct:0,expl:'Bajka = krátký alegorický příběh s morálním ponaučením, postavy jsou zvířata.'},
+{cat:'literature',text:'<b>R.U.R.</b> je divadelní hra od:',options:['Karel Čapek','Václav Havel','Jaroslav Hašek','Jan Neruda'],correct:0,expl:'R.U.R. (1920) – Karel Čapek. Zavedl slovo „robot" do světových jazyků.'},
+{cat:'literature',text:'Co je to <b>lyrickoepická</b> skladba?',options:['dílo spojující děj s lyrickými prvky','čistá lyrika','divadelní hra','pohádka'],correct:0,expl:'Lyrickoepická skladba = dílo s příběhem (epika) obohacené lyrickou obrazností.'},
+{cat:'literature',text:'Co je to <b>monolog</b>?',options:['promluva jedné osoby','rozhovor dvou postav','promluva vypravěče','konec příběhu'],correct:0,expl:'Monolog = samostatná promluva jedné osoby. Dialog = rozhovor dvou nebo více osob.'},
+{cat:'literature',text:'Kdo napsal <b>Malého prince</b>?',options:['Antoine de Saint-Exupéry','Jules Verne','Victor Hugo','Albert Camus'],correct:0,expl:'Malý princ (Le Petit Prince, 1943) – Antoine de Saint-Exupéry. Filosofická pohádka pro děti i dospělé.'},
+{cat:'literature',text:'Co jsou to <b>lidové pohádky</b>?',options:['anonymní příběhy předávané ústní tradicí','autorské pohádky se jménem spisovatele','pohádky z jiných zemí','moderní fantasy příběhy'],correct:0,expl:'Lidové pohádky jsou anonymní texty předávané po generace ústní tradicí.'},
+{cat:'literature',text:'Kdo je autorem <b>Hamleta</b>?',options:['William Shakespeare','Johann Wolfgang von Goethe','Henrik Ibsen','Molière'],correct:0,expl:'Hamlet (cca 1600–1601) – William Shakespeare. Tragédie o pomstě, vině a existenciálních otázkách.'},
+{cat:'literature',text:'Co je <b>haiku</b>?',options:['japonská krátká báseň se strukturou 5-7-5 slabik','německý veršový útvar','rýmovaná balada','epická báseň'],correct:0,expl:'Haiku = japonský básnický útvar: 3 verše, struktura 5-7-5 slabik, zachycuje přírodu a okamžik.'},
+{cat:'literature',text:'<b>Pohádka o Šípkové Růžence</b> pochází z pera bratří:',options:['Grimmů','Andersenových','Erbenových','Perraultových'],correct:0,expl:'Šípková Růženka (Dornröschen) = pohádka bratří Grimmů (1812).'},
+{cat:'literature',text:'Jak se nazývá epické dílo ve verších popisující hrdinské činy?',options:['epos','óda','elegie','sonet'],correct:0,expl:'Epos = rozsáhlá epická báseň o hrdinech (Homér: Ilias, Odyssea).'},
+{cat:'literature',text:'Jaký literární pojem označuje opakování slov na začátku veršů?',options:['anafora','epifora','refrén','aliterace'],correct:0,expl:'Anafora = opakování slov na začátku veršů/vět. Epifora = opakování na konci.'},
+{cat:'literature',text:'Co je <b>tragédie</b> jako literární žánr?',options:['dramatické dílo s vážným tématem a nešťastným koncem','veselé divadelní dílo','pohádkový příběh','satirická báseň'],correct:0,expl:'Tragédie = drama s vážným tématem, kde hrdina zpravidla hyně (Shakespeare: Hamlet, Romeo a Julie).'},
+// ===== TVAROSLOVÍ =====
+{cat:'grammar',text:'Jak zní 2. pád množného čísla slova „<b>dítě</b>"?',options:['dětí','dítěte','dětem','dítěti'],correct:0,expl:'Dítě – dětí (2.p.mn.č.). Vzor kuře: dítě – dítěte – dítěti…'},
+{cat:'grammar',text:'Jak zní 3. pád jednotného čísla slova „<b>ruka</b>"?',options:['ruce','ruky','rukou','rukám'],correct:0,expl:'Ruka – ruce (dativ j.č., vzor žena, alternace k→c).'},
+{cat:'grammar',text:'V jaké osobě a čísle je sloveso „<b>píší</b>"?',options:['3. osoba množného čísla','1. osoba jednotného čísla','2. osoba množného čísla','3. osoba jednotného čísla'],correct:0,expl:'Píší = oni píší (3.os.mn.č.). Píšu = já, píšeš = ty, píše = on.'},
+{cat:'grammar',text:'Přídavné jméno „<b>dobrý</b>" stupňujeme: dobrý – lepší – ___?',options:['nejlepší','nejdobrější','dobrší','nejdobrý'],correct:0,expl:'Dobrý – lepší – nejlepší. Nepravidelné stupňování.'},
+{cat:'grammar',text:'Jak se nazývá jev, kdy se hlásky mění podle okolních hlásek (např. k→c v „ruka→ruce")?',options:['alternace (hláskové střídání)','asimilace','elise','protetika'],correct:0,expl:'Alternace = pravidelná změna hlásek v rámci tvarosloví (ruka-ruce: k→c, d→ď, t→ť před -i/í/ě).'},
+{cat:'grammar',text:'Jak zní správný tvar přídavného jméno „<b>modrý</b>" v 7. pádě množného čísla?',options:['modrými','modré','modrý','modrých'],correct:0,expl:'7. pád (Instrumentál) mn.č. přídavných jmen vzoru „mladý": -ými → modrými.'},
+{cat:'grammar',text:'Co je to <b>zvratné sloveso</b>? Vyberte příklad:',options:['mýt se','mýt','umýt','myji'],correct:0,expl:'Zvratná slovesa mají zvratné zájmeno „se" nebo „si" (mýt se, smát se, učit se).'},
+{cat:'grammar',text:'Jak zní rod a číslo podstatného jména „<b>kuřata</b>"?',options:['střední rod, množné číslo','střední rod, jednotné číslo','ženský rod, množné číslo','mužský rod, množné číslo'],correct:0,expl:'Kuřata = mn.č. od „kuře" (střední rod, vzor KUŘE).'},
+{cat:'grammar',text:'Co označuje pojem <b>skloňování</b> (deklinace)?',options:['změny tvarů podstatných a přídavných jmen podle pádu a čísla','změny tvarů sloves','přidávání přípon','tvoření příslovcí'],correct:0,expl:'Skloňování = ohýbání jmen podle pádu a čísla.'},
+{cat:'grammar',text:'Jak se nazývá ohýbání sloves?',options:['časování (konjugace)','skloňování (deklinace)','odvozování','stupňování'],correct:0,expl:'Časování (konjugace) = změny tvarů sloves podle osoby, čísla, času, způsobu a rodu.'},
+{cat:'grammar',text:'Vyberte příklad slovesa ve <b>trpném rodě</b> (pasivum):',options:['Dopis byl napsán.','Napsal jsem dopis.','Píšu dopis.','Napsal bych dopis.'],correct:0,expl:'Trpný rod = podmětem je ten, kdo trpí děj: „Dopis byl napsán (někým)."'},
+{cat:'grammar',text:'Slova „rychlopalba, velkoměsto, prvorozený" jsou tvořena:',options:['skládáním (kompozicí)','odvozováním','zkracováním','přejímáním'],correct:0,expl:'Složeniny (kompozita) vznikají spojením dvou nebo více základů.'},
+{cat:'grammar',text:'Jaký čas je v „Budu studovat"?',options:['budoucí','přítomný','minulý','podmiňovací'],correct:0,expl:'Budoucí čas analytický (opisný): budu/budeš/bude... + infinitiv.'},
+{cat:'grammar',text:'Co je to <b>předpona</b> (prefix)?',options:['část slova připojená před kořen','část slova připojená za kořen','základní část slova','samotný kořen'],correct:0,expl:'Předpona se připojuje před kořen/základ slova (před-/pro-/ne-/roz-/za-…).'},
+{cat:'grammar',text:'Sloveso „bát se" je sloveso:',options:['zvratné','přechodné (tranzitivní)','neosobní','zpřídavnělé'],correct:0,expl:'Bát se = zvratné sloveso (vždy se zájmenem se). Je to také intranzitivní sloveso.'},
+{cat:'grammar',text:'Jaký tvar má 2. osoba množného čísla rozkazovacího způsobu slovesa „<b>jít</b>"?',options:['jděte','jdejte','jdete','jídejte'],correct:0,expl:'Jít → imperativ: jdi (2.os.j.č.), jděme (1.os.mn.č.), jděte (2.os.mn.č.).'},
+// ===== DALŠÍ RŮZNÉ =====
+{cat:'vocab',text:'Co je to <b>elipsa</b> ve větě?',options:['vynechání části výpovědi, která je zřejmá z kontextu','zkratka','obrácení pořadí slov','opakování'],correct:0,expl:'Elipsa = gramatické vynechání (Kam jdeš? – Do školy. = [Jdu] do školy). Typické pro hovorovou řeč.'},
+{cat:'vocab',text:'Jaká je funkce <b>řečnické otázky</b>?',options:['zdůraznit postoj nebo podnítit zamyšlení, ne čekat odpověď','získat konkrétní odpověď','uvést výčet','zakončit vypravování'],correct:0,expl:'Řečnická otázka (quaestio rhetorica) se nepokládá pro získání odpovědi, ale k vyjádření postoje.'},
+{cat:'literature',text:'Jakému literárnímu směru náleží tvorba <b>Otokara Březiny</b>?',options:['symbolismus','realismus','romantismus','naturalismus'],correct:0,expl:'Otokar Březina (1868–1929) = přední český symbolista. Jeho sbírky (Tajemné dálky, Svítání na západě) pracují se symboly, hudbou jazyka a mystickými a filozofickými tématy.'},
+{cat:'syntax',text:'Ve větě „Všechny děti rády kreslí." podmět je:',options:['Všechny děti (podmět rozvitý)','děti (holý podmět)','Všechny','rády'],correct:0,expl:'Podmět rozvitý = podmět + přívlastek: „Všechny děti" (holý podmět = děti).'},
+{cat:'vocab',text:'Jaké jazykové prostředky patří do <b>spisovné češtiny</b>?',options:['neutrální výrazy, knižní výrazy, termíny','slang, argot, vulgarismy','nářečí, dialekty','zkratky SMS jazyku'],correct:0,expl:'Spisovná čeština zahrnuje neutrální, hovorové, knižní a odborné vrstvy.'},
+// ===== DALŠÍ OTÁZKY - SADA 2 =====
+{cat:'grammar',text:'Slovo „<b>neposedný</b>" – záporná předpona „ne-" je:',options:['předpona měnící smysl na záporný','příponou','kořenem','koncovkou'],correct:0,expl:'Záporná předpona ne- obrací nebo popírá základní význam (neposedný ≠ posedný).'},
+{cat:'grammar',text:'Které slovo patří ke vzoru „<b>stroj</b>"?',options:['pokoj','dub','les','hrad'],correct:0,expl:'Vzor stroj = mužský rod neživotný, měkký vzor (pokoj, kraj, čaj, vůz). Dub, les i hrad patří ke tvrdému vzoru „hrad". Poznáme to podle genitivu: pokoje (měkký), hradu (tvrdý).'},
+{cat:'grammar',text:'Přídavné jméno „<b>jarní</b>" (jarní den) se skloňuje podle vzoru:',options:['jarní (měkký vzor)','mladý (tvrdý vzor)','otcův','matčin'],correct:0,expl:'Přídavná jména na -í (jarní, letní, ranní) = měkký vzor „jarní".'},
+{cat:'grammar',text:'Jaký slovní druh je slovo „<b>protože</b>"?',options:['spojka podřadicí','spojka souřadicí','příslovce','předložka'],correct:0,expl:'Protože = podřadicí spojka uvozující větu příčinnou (vedlejší větu).'},
+{cat:'grammar',text:'Sloveso „<b>číst</b>" – jak zní přechodník přítomný (mužský/ženský rod)?',options:['čta / čtouc','čtoucí / čtoucí','přečtev / přečtevši','čte / čtou'],correct:0,expl:'Přechodník přítomný = čta (mužský rod), čtouc (ženský rod a množné číslo). Je to zastaralý tvar vyjadřující souběžný děj (Čta knihu, usnul.). Nezaměňovat s příčestím přítomným „čtoucí".'},
+{cat:'grammar',text:'Které z následujících slov je <b>zájmeno přivlastňovací</b>?',options:['jejich','oni','někdo','onen'],correct:0,expl:'Zájmena přivlastňovací: můj, tvůj, jeho, její, náš, váš, jejich – vyjadřují příslušnost.'},
+{cat:'grammar',text:'Jak se nazývá slovesný tvar, který se skloňuje jako přídavné jméno a vyjadřuje vlastnost (např. „<b>čtoucí</b> dítě")?',options:['příčestí přítomné (slovesné přídavné jméno)','přechodník přítomný','infinitiv','příčestí minulé'],correct:0,expl:'Příčestí přítomné (slovesné přídavné jméno) = čtoucí, běžící, spící – skloňuje se jako přídavné jméno. Přechodník (čta, čtouc) se naopak neskloňuje a vyjadřuje průvodní děj.'},
+{cat:'spelling',text:'Jak správně zapsat 1. pád množného čísla: „Přišly _____"? (od slova neteř)',options:['neteře','netěře','neteřě','netěřě'],correct:0,expl:'Neteř → neteře (1. pád množného čísla, vzor PÍSEŇ: píseň – písně, neteř – neteře). Délka nad e se nemění.'},
+{cat:'spelling',text:'Vyberte větu se správně napsanými uvozovkami:',options:['Řekl: „Přijdu zítra."','Řekl: "Přijdu zítra."','Řekl: »Přijdu zítra.«','Řekl: \'Přijdu zítra.\''],correct:0,expl:'Česky správné uvozovky jsou „dole nahoře" – „takto". Anglické "uvozovky" nejsou v češtině standardem.'},
+{cat:'spelling',text:'Které slovo je správně napsáno s <b>ů</b> (kroužkové u)?',options:['dům','dúm','dum','duum'],correct:0,expl:'Ů se píše uprostřed a na konci slova (dům, nůž, stůl, domů). Na začátku slova se píše vždy ú (úkol, útok, ústa).'},
+{cat:'spelling',text:'Vyberte správně napsané slovo:',options:['přijít','přijit','přijýt','příjít'],correct:0,expl:'Přijít = dorazit pěšky/pohybem. Délka nad í: přijít (od jít = pohyb).'},
+{cat:'spelling',text:'Jak se píší příslovce složená ze dvou slov, např. „<b>pozpátku</b>", „<b>najednou</b>"?',options:['dohromady (jedno slovo)','s pomlčkou (po-zpátku)','zvlášť (po zpátku)','záleží na délce slova'],correct:0,expl:'Složená příslovce se v češtině píší dohromady: najednou, pozpátku, odjakživa, pořád, dokola, dohromady.'},
+{cat:'spelling',text:'Velká písmena se píší u:',options:['vlastních jmen (Praha, Petr, Česká republika)','všech podstatných jmen','přídavných jmen jakostních','všech slov na začátku odstavce'],correct:0,expl:'Velká písmena u vlastních jmen: lidé, místní jména, instituce, tituly jako součást jména.'},
+{cat:'syntax',text:'Věta „<b>Najednou se stmívá.</b>" má přísudek:',options:['neosobní slovesný','jmenný se sponou','slovesný osobní','eliptický'],correct:0,expl:'Neosobní sloveso (stmívá se, prší, sněží) = nelze k němu přiřadit podmět osoby.'},
+{cat:'syntax',text:'Co je to souvětí s <b>poměrem důsledkovým</b>? Vyberte příklad.',options:['Pršelo, a proto jsme zůstali doma.','Pršelo a sněžilo.','Pršelo, ale šli jsme ven.','Buď prší, nebo svítí.'],correct:0,expl:'Důsledkový poměr: a proto, a tak, tedy, tudíž. Druhá věta je důsledkem první.'},
+{cat:'syntax',text:'Ve větě „Jan četl <b>celý den</b> v parku." je „celý den" jakým větným členem?',options:['příslovečné určení času','předmět','přívlastek','doplněk'],correct:0,expl:'Příslovečné určení času odpovídá na otázku „Kdy? Jak dlouho?" – celý den.'},
+{cat:'syntax',text:'Určete druh vedlejší věty: „Přišel, <b>aby ti pomohl</b>."',options:['příslovečná účelová','příslovečná příčinná','předmětná','přívlastková'],correct:0,expl:'Aby uvozuje vedlejší větu účelovou (za jakým účelem?).'},
+{cat:'syntax',text:'Souvětí „Nepřišel, <b>přestože</b> slíbil." má větu vedlejší:',options:['přípustkovou','příčinnou','podmítkovou','účelovou'],correct:0,expl:'Přestože, ačkoli, i když = přípustkové spojky.'},
+{cat:'syntax',text:'Co je to <b>parenteze</b>?',options:['vsuvka – větný člen vložený do věty a oddělen čárkami nebo závorkami','přívlastek volný','podmět nevyjádřený','souvětí souřadné'],correct:0,expl:'Parenteze (vsuvka) = věta nebo výraz vložený do jiné věty, gramaticky na ní nezávislý.'},
+{cat:'vocab',text:'Slovo „<b>autobus</b>" – jakým způsobem bylo toto slovo utvořeno?',options:['skládáním (auto + bus)','odvozováním příponou','přejímáním beze změny','zkracováním'],correct:0,expl:'Autobus = složenina (kompositum) z auto + bus. Skládání (kompozice) = spojení dvou nebo více slovních základů v jedno slovo.'},
+{cat:'vocab',text:'Co je to <b>jazykový styl</b>?',options:['způsob vyjadřování přizpůsobený situaci a účelu','seznam slov','gramatická pravidla','pravopis'],correct:0,expl:'Jazykový styl = způsob výběru a uspořádání jazykových prostředků podle situace (hovorový, odborný, umělecký…).'},
+{cat:'vocab',text:'Jaký slohový útvar je <b>inzerát</b>?',options:['publicistický útvar s informativní a přesvědčovací funkcí','lyrická báseň','vědecká stať','dramatický text'],correct:0,expl:'Inzerát = publicistický/reklamní text s cílem nabídnout nebo hledat zboží, práci, partnera apod.'},
+{cat:'vocab',text:'Co je to <b>univerbizace</b>? Vyberte příklad.',options:['lednice (z „ledová skříň")','automobil','auto','notebook'],correct:0,expl:'Univerbizace = nahrazení víceslovného pojmenování jedním slovem (ledová skříň → lednice, zemní plyn → zemák). Slovo „auto" je přejato přímo jako zkratka latinského „automobilis".'},
+{cat:'vocab',text:'Co je to <b>konnotace</b> slova?',options:['vedlejší, citový nebo kulturní přídatný význam','základní slovníkový význam','gramatická kategorie','zvukový tvar slova'],correct:0,expl:'Konotace = přidružený, citový nebo hodnotící odstín slova (had = konotace zrady).'},
+{cat:'vocab',text:'Přirovnání, v němž je srovnávaný jev přímo pojmenován, se nazývá:',options:['přirovnání (simile)','metafora','metonymie','synekdocha'],correct:0,expl:'Přirovnání (simile) = přímé porovnání pomocí „jako, podobný jako". Metafora srovnání skrývá.'},
+{cat:'literature',text:'Karel Čapek napsal utopický román o hrozícím vyhubení lidstva:',options:['Válka s Mloky','R.U.R.','Bílá nemoc','Věc Makropulos'],correct:0,expl:'Válka s Mloky (1936) – Čapek. Satirický román varující před fašismem a pokusem o ovládnutí světa.'},
+{cat:'literature',text:'Co je to <b>sonet</b>?',options:['báseň o 14 verších, zpravidla dvě čtyřverší a dvě trojverší','volná báseň bez pevné formy','epická balada','pohádkový příběh ve verších'],correct:0,expl:'Sonet = pevná lyrická forma: 4+4+3+3 verše (italský/shakespearovský sonet).'},
+{cat:'literature',text:'Kdo napsal knihu <b>Deník malého poseroutky</b>?',options:['Jeff Kinney','J. K. Rowlingová','Roald Dahl','Astrid Lindgrenová'],correct:0,expl:'Deník malého poseroutky (Diary of a Wimpy Kid) – Jeff Kinney. Série humoristických knih pro mládež.'},
+{cat:'literature',text:'<b>Balada</b> je:',options:['lyrickoepická báseň s tragickým dějem','komická hra s happyendem','epický román o hrdinech','čistě lyrická báseň bez děje'],correct:0,expl:'Balada = lyrickoepická báseň s napínavým a zpravidla tragickým příběhem.'},
+{cat:'literature',text:'Kdo napsal sérii knih o <b>Harrym Potterovi</b>?',options:['J. K. Rowlingová','C. S. Lewis','J. R. R. Tolkien','Philip Pullman'],correct:0,expl:'Harry Potter series (1997–2007) – J. K. Rowlingová (Joanne Kathleen Rowling).'},
+{cat:'literature',text:'Co je to <b>autobiografie</b>?',options:['životopis napsaný samotným autorem','životopis napsaný jiným autorem','fiktivní příběh','vědecká stať'],correct:0,expl:'Autobiografie = životopis psaný samotným autorem o sobě. Biografie = psaná někým jiným.'},
+{cat:'literature',text:'Dílo <b>Romeo a Julie</b> patří do žánru:',options:['tragédie','komedie','kronika','pohádka'],correct:0,expl:'Romeo a Julie (Shakespeare) = tragédie – milostný příběh s nešťastným koncem.'},
+{cat:'literature',text:'Jaký literární termín označuje záměrné přehánění?',options:['hyperbola','eufemismus','litotes','oxymóron'],correct:0,expl:'Hyperbola = záměrné přehánění pro zdůraznění (Čekal jsem věčnost! Umřel bych hlady!).'},
+{cat:'literature',text:'Co je to <b>oxymóron</b>?',options:['spojení slov zdánlivě protikladného smyslu','záměrné přehánění','opisné pojmenování','přenesení pojmenování'],correct:0,expl:'Oxymóron = spojení zdánlivě neslučitelných pojmů (živá smrt, tichý křik, hořká sladkost).'},
+{cat:'literature',text:'Která pohádka pochází z tvorby Hanse Christiana Andersena?',options:['Malá mořská víla','Šípková Růženka','Popelka','Sněhurka'],correct:0,expl:'Malá mořská víla (Den lille havfrue, 1837) – Hans Christian Andersen. Dánský spisovatel pohádek.'},
+{cat:'grammar',text:'Slovo „<b>pravopis</b>" je:',options:['složenina (pravý + pis)','odvozené slovo','přejaté slovo','zkratka'],correct:0,expl:'Pravopis = složenina z pravý + pis (= správné písmo, psaní).'},
+{cat:'grammar',text:'Jaký je rod a vzor podstatného jména „<b>píseň</b>"?',options:['ženský rod, vzor píseň','ženský rod, vzor žena','střední rod, vzor stavení','mužský rod, vzor muž'],correct:0,expl:'Píseň – té písně, té písni = ženský rod, vzor PÍSEŇ (měkká varianta ženského vzoru).'},
+{cat:'grammar',text:'Sloveso „<b>moci</b>" je:',options:['modální sloveso (způsobové)','neosobní sloveso','zvratné sloveso','pomocné sloveso'],correct:0,expl:'Moci/muset/smět/chtít/mít = modální (způsobová) slovesa vyjadřující postoj k ději.'},
+{cat:'syntax',text:'„<b>Kdo</b> ráno vstává, tomu Bůh dává." – věta s „Kdo" je:',options:['podmětná vedlejší věta','přívlastková vedlejší věta','příslovečná vedlejší věta','věta hlavní'],correct:0,expl:'Podmětná vedlejší věta zastupuje podmět hlavní věty (Kdo ráno vstává = ten).'},
+{cat:'syntax',text:'Věta „Odjel, <b>aniž by</b> se rozloučil." má vedlejší větu:',options:['přípustkovou (zápornou)','podmínkovou','předmětnou','příslovečnou způsobu'],correct:0,expl:'Aniž (by) uvozuje zápornou přípustkovou vedlejší větu (bez toho, že by).'},
+{cat:'vocab',text:'Co je to <b>eufemismus</b>?',options:['jemné opisné pojmenování náhradzující hrubé nebo bolestné výrazy','záměrné přehánění','ironická nadsázka','přímé pojmenování'],correct:0,expl:'Eufemismus = jemné, zjemňující výrazy (zemřít → odejít na věčnost, starý → v pokročilém věku).'},
+{cat:'vocab',text:'Co je to <b>ironie</b> jako stylový prostředek?',options:['výrok, jehož skutečný smysl je opačný k doslovu','záměrné přehánění','přímé přirovnání','opis pojmenování'],correct:0,expl:'Ironie = říkáme opak toho, co myslíme. „To je krásné!" (o něčem ošklivém).'},
+{cat:'vocab',text:'Termín „denotace" označuje:',options:['základní, přímý slovníkový význam slova','citový přídatný význam','zvukové vlastnosti slova','odvozené slovo'],correct:0,expl:'Denotace = základní, doslovný, slovníkový (neutrální) význam. Konotace = přidružený citový smysl.'},
+{cat:'spelling',text:'Ve které z vět jsou čárky napsány správně u vsuvky?',options:['Kniha, jak jsem očekával, mě nadchla.','Kniha jak jsem očekával, mě nadchla.','Kniha, jak jsem očekával mě nadchla.','Kniha jak jsem očekával mě nadchla.'],correct:0,expl:'Vsuvka (parenteze) se odděluje čárkami z obou stran: „Kniha, jak jsem očekával, mě nadchla."'},
+{cat:'spelling',text:'Jak napíšeme příslovce od přídavného jméno „<b>krásný</b>"?',options:['krásně','krasně','krásnè','krásnī'],correct:0,expl:'Krásný → krásně (příslovce od přídavných jmen na -ný se tvoří příponou -ně).'},
+{cat:'literature',text:'Co je to <b>próza</b> s ich-formou?',options:['příběh vyprávěný v 1. osobě (já)','příběh vyprávěný ve 3. osobě','báseň v 1. osobě','dramatický monolog'],correct:0,expl:'Ich-forma (ich = já) = vypravěč v první osobě. Er-forma (er = on) = ve třetí osobě.'},
+{cat:'literature',text:'Jak se nazývá vložený příběh v příběhu?',options:['rámcová kompozice','lineární kompozice','retrospektiva','prolog'],correct:0,expl:'Rámcová kompozice = příběh obsahující jiný příběh uvnitř (rámec + vložený příběh).'},
+{cat:'literature',text:'Dílo <b>Spalovač mrtvol</b> napsal:',options:['Ladislav Fuks','Bohumil Hrabal','Milan Kundera','Josef Škvorecký'],correct:0,expl:'Spalovač mrtvol (1967) – Ladislav Fuks. Psychologická novela o Kopfrkingleovi.'},
+{cat:'grammar',text:'Ve větě „Petr <b>si</b> koupil auto." je „si" jakým slovním druhem?',options:['zájmeno zvratné','zájmeno osobní','příslovce','částice'],correct:0,expl:'Si/se = zvratná zájmena (vždy bez přízvuku). Nekloní se podle pádu osoby, ale doprovázejí zvratná slovesa.'},
+{cat:'syntax',text:'Ve větě „Maminka <b>mu</b> uvařila polévku." je „mu" jakým větným členem?',options:['předmět (dativ)','podmět','přísudek','příslovečné určení'],correct:0,expl:'Mu = zájmeno v dativu (3. pád). Uvařila komu? = mu. = předmět v dativu.'},
+{cat:'vocab',text:'„<b>Litotes</b>" je stylistický prostředek, při němž:',options:['popíráme opak toho, co chceme říct (kladné vyjádření zápornou formou)','přehánějíme','metaforicky popisujeme','přirovnáváme'],correct:0,expl:'Litotes = kladné vyjádření zápornou formou (ne nejhorší = dobrý; nemenší než = stejný nebo větší).'},
+];
+
+
+
+// =====================
+// QUIZ LOGIC
+// =====================
+let quizQuestions = [];
+let current = 0;
+let score = 0;
+let answered = false;
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function startQuiz() {
+  quizQuestions = shuffle(allQuestions).slice(0, 20);
+  current = 0;
+  score = 0;
+  answered = false;
+  document.getElementById('start-screen').style.display = 'none';
+  document.getElementById('result-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'block';
+  loadQuestion();
+}
+
+function loadQuestion() {
+  answered = false;
+  const q = quizQuestions[current];
+  document.getElementById('q-num').textContent = current + 1;
+  document.getElementById('score-live').textContent = score + ' správně';
+  document.getElementById('progress-fill').style.width = (current / 20 * 100) + '%';
+
+  const catMap = {grammar:'Mluvnice',syntax:'Větná skladba',spelling:'Pravopis',vocab:'Slovní zásoba',literature:'Literatura'};
+  const catEl = document.getElementById('q-category');
+  catEl.textContent = catMap[q.cat] || q.cat;
+  catEl.className = 'q-category ' + q.cat;
+
+  document.getElementById('question-text').innerHTML = q.text;
+
+  // shuffle options
+  const n = q.options.length;
+  const idxArr = shuffle([0,1,2,3].slice(0,n));
+  const letters = ['A','B','C','D'];
+  const container = document.getElementById('options-list');
+  container.innerHTML = '';
+  idxArr.forEach((origIdx, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.innerHTML = `<span class="option-letter">${letters[i]}</span><span>${q.options[origIdx]}</span>`;
+    btn.onclick = () => selectAnswer(btn, origIdx, q.correct, q, idxArr, container);
+    container.appendChild(btn);
+  });
+
+  document.getElementById('explanation-box').className = 'explanation-box';
+  document.getElementById('explanation-box').innerHTML = '';
+  document.getElementById('next-btn').className = 'next-btn';
+  document.getElementById('next-btn').textContent = current < 19 ? 'Další otázka →' : 'Zobrazit výsledek →';
+
+  const card = document.getElementById('question-card');
+  card.style.animation = 'none';
+  void card.offsetHeight;
+  card.style.animation = 'slideUp 0.35s ease';
+}
+
+function selectAnswer(clickedBtn, selectedIdx, correctIdx, q, idxArr, container) {
+  if (answered) return;
+  answered = true;
+  const allBtns = container.querySelectorAll('.option-btn');
+  allBtns.forEach(b => b.disabled = true);
+
+  if (selectedIdx === correctIdx) {
+    clickedBtn.classList.add('correct');
+    score++;
+  } else {
+    clickedBtn.classList.add('wrong');
+    allBtns.forEach((btn, i) => {
+      if (idxArr[i] === correctIdx) btn.classList.add('correct');
+    });
+  }
+  document.getElementById('score-live').textContent = score + ' správně';
+
+  const expEl = document.getElementById('explanation-box');
+  expEl.innerHTML = '<strong>💡 Vysvětlení:</strong> ' + q.expl;
+  expEl.className = 'explanation-box show';
+  document.getElementById('next-btn').className = 'next-btn show';
+}
+
+function nextQuestion() {
+  current++;
+  if (current >= 20) showResult();
+  else loadQuestion();
+}
+
+function showResult() {
+  document.getElementById('quiz-screen').style.display = 'none';
+  document.getElementById('result-screen').style.display = 'block';
+
+  const pct = Math.round((score / 20) * 100);
+  document.getElementById('score-pct-big').textContent = pct + '%';
+  document.getElementById('res-correct').textContent = score;
+  document.getElementById('res-wrong').textContent = 20 - score;
+
+  const bigNum = document.getElementById('score-pct-big');
+  if (pct >= 86) bigNum.style.color = '#e8c547';
+  else if (pct >= 71) bigNum.style.color = '#4ea8de';
+  else if (pct >= 56) bigNum.style.color = '#6bcb77';
+  else if (pct >= 41) bigNum.style.color = '#f4a337';
+  else bigNum.style.color = '#ff6b6b';
+
+  let title, sub;
+  if (pct >= 90) { title = '🏆 Vynikající!'; sub = 'Tohle je výsledek na výbornou. Přijímačky zvládneš!'; }
+  else if (pct >= 75) { title = '✨ Skvělý výsledek!'; sub = 'Jsi nad průměrem. Ještě trochu procvič a budeš připraven/a.'; }
+  else if (pct >= 60) { title = '👍 Dobrá práce'; sub = 'Základ máš, ale některé oblasti potřebují zopakovat.'; }
+  else if (pct >= 40) { title = '📚 Je co zlepšovat'; sub = 'Doporučuji se zaměřit na mluvnici a větnou skladbu.'; }
+  else { title = '💪 Nevzdávej to!'; sub = 'Zkus znovu – každé opakování ti pomůže.'; }
+
+  document.getElementById('result-title').textContent = title;
+  document.getElementById('result-sub').textContent = sub;
+
+  const marker = document.getElementById('pct-marker');
+  marker.style.left = Math.min(Math.max(pct, 2), 98) + '%';
+  marker.textContent = pct + '%';
+
+  let gradeText;
+  if (pct >= 86) gradeText = '📊 Výsledek odpovídá horní části CERMAT testů – silní uchazeči.';
+  else if (pct >= 71) gradeText = '📊 Výsledek odpovídá nadprůměrným uchazečům JPZ.';
+  else if (pct >= 56) gradeText = '📊 Výsledek odpovídá průměru přijatých uchazečů.';
+  else if (pct >= 41) gradeText = '📊 Výsledek je pod průměrem – intenzivní přípravu doporučujeme.';
+  else gradeText = '📊 Výsledek vyžaduje systematickou přípravu na všechny oblasti.';
+  document.getElementById('grade-text').textContent = gradeText;
+}
+
+function showStart() {
+  document.getElementById('result-screen').style.display = 'none';
+  document.getElementById('start-screen').style.display = 'block';
+}
+</script>
+</body>
+</html>
