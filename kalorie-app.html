@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+
+<html lang="cs">
+
+<head>
+
+&nbsp; <meta charset="UTF-8">
+
+&nbsp; <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+&nbsp; <title>Kalorie AI</title>
+
+&nbsp; <script src="https://cdn.tailwindcss.com"></script>
+
+&nbsp; <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+
+&nbsp; <style>
+
+&nbsp;   body { font-family: system-ui, -apple-system, sans-serif; }
+
+&nbsp;   .camera-btn { background: linear-gradient(135deg, #10b981, #34d399); }
+
+&nbsp; </style>
+
+</head>
+
+<body class="bg-zinc-950 text-white min-h-screen pb-20">
+
+&nbsp; <div class="max-w-xl mx-auto p-4">
+
+&nbsp;   <!-- Header -->
+
+&nbsp;   <div class="flex justify-between items-center mb-6">
+
+&nbsp;     <h1 class="text-3xl font-bold text-emerald-400">🍽️ Kalorie AI</h1>
+
+&nbsp;     <button onclick="toggleSettings()" class="text-2xl"><i class="fas fa-cog"></i></button>
+
+&nbsp;   </div>
+
+
+
+&nbsp;   <!-- API Key settings -->
+
+&nbsp;   <div id="settings" class="hidden bg-zinc-900 p-4 rounded-2xl mb-6">
+
+&nbsp;     <p class="text-sm text-zinc-400 mb-2">Gemini API klíč</p>
+
+&nbsp;     <input id="apiKey" type="text" placeholder="AIzaSy..." 
+
+&nbsp;            class="w-full bg-zinc-800 p-3 rounded-xl text-sm">
+
+&nbsp;     <button onclick="saveApiKey()" 
+
+&nbsp;             class="mt-3 w-full bg-emerald-500 py-3 rounded-xl font-medium">Uložit klíč</button>
+
+&nbsp;   </div>
+
+
+
+&nbsp;   <!-- Camera / Preview -->
+
+&nbsp;   <div class="bg-zinc-900 rounded-3xl overflow-hidden shadow-2xl">
+
+&nbsp;     <div id="preview" class="aspect-square bg-black flex items-center justify-center relative">
+
+&nbsp;       <input type="file" id="fileInput" accept="image/\*" capture="environment" class="hidden">
+
+&nbsp;       <button onclick="takePhoto()" 
+
+&nbsp;               class="camera-btn w-20 h-20 rounded-full flex items-center justify-center text-4xl shadow-xl active:scale-95 transition">
+
+&nbsp;         📸
+
+&nbsp;       </button>
+
+&nbsp;       <img id="photo" class="hidden w-full h-full object-cover">
+
+&nbsp;     </div>
+
+&nbsp;   </div>
+
+
+
+&nbsp;   <div class="flex gap-3 mt-4">
+
+&nbsp;     <button onclick="takePhoto()" 
+
+&nbsp;             class="flex-1 bg-zinc-800 hover:bg-zinc-700 py-4 rounded-2xl font-medium flex items-center justify-center gap-2">
+
+&nbsp;       <i class="fas fa-camera"></i> Nové foto
+
+&nbsp;     </button>
+
+&nbsp;     <button onclick="analyze()" id="analyzeBtn"
+
+&nbsp;             class="flex-1 bg-emerald-500 hover:bg-emerald-600 py-4 rounded-2xl font-medium flex items-center justify-center gap-2 disabled:opacity-50"
+
+&nbsp;             disabled>
+
+&nbsp;       <i class="fas fa-wand-magic-sparkles"></i> Analyzovat jídlo
+
+&nbsp;     </button>
+
+&nbsp;   </div>
+
+
+
+&nbsp;   <!-- Results -->
+
+&nbsp;   <div id="results" class="mt-8 hidden bg-zinc-900 rounded-3xl p-6">
+
+&nbsp;     <h2 class="text-xl font-semibold mb-4">📊 Výsledky</h2>
+
+&nbsp;     <div id="items" class="space-y-4"></div>
+
+&nbsp;     
+
+&nbsp;     <div class="mt-8 border-t border-zinc-700 pt-6">
+
+&nbsp;       <div class="flex justify-between text-2xl font-bold">
+
+&nbsp;         <span>Celkem</span>
+
+&nbsp;         <span id="totalCal" class="text-emerald-400">0 kcal</span>
+
+&nbsp;       </div>
+
+&nbsp;     </div>
+
+
+
+&nbsp;     <button onclick="logMeal()" 
+
+&nbsp;             class="mt-6 w-full bg-white text-black py-4 rounded-2xl font-semibold text-lg">
+
+&nbsp;       ✅ Zapsat do deníku
+
+&nbsp;     </button>
+
+&nbsp;   </div>
+
+
+
+&nbsp;   <!-- History -->
+
+&nbsp;   <div class="mt-10">
+
+&nbsp;     <h2 class="text-lg font-semibold mb-3 flex items-center gap-2">
+
+&nbsp;       <i class="fas fa-history"></i> Dnešní příjem
+
+&nbsp;     </h2>
+
+&nbsp;     <div id="history" class="space-y-3"></div>
+
+&nbsp;   </div>
+
+&nbsp; </div>
+
+
+
+&nbsp; <script>
+
+&nbsp;   let currentBase64 = null;
+
+&nbsp;   let currentResult = null;
+
+
+
+&nbsp;   // Tailwind script
+
+&nbsp;   function initTailwind() {
+
+&nbsp;     tailwind.config = { content: \["\*"], theme: { extend: {} } };
+
+&nbsp;   }
+
+
+
+&nbsp;   function takePhoto() {
+
+&nbsp;     document.getElementById('fileInput').click();
+
+&nbsp;   }
+
+
+
+&nbsp;   document.getElementById('fileInput').addEventListener('change', function(e) {
+
+&nbsp;     const file = e.target.files\[0];
+
+&nbsp;     if (!file) return;
+
+&nbsp;     
+
+&nbsp;     const reader = new FileReader();
+
+&nbsp;     reader.onload = function(ev) {
+
+&nbsp;       currentBase64 = ev.target.result.split(',')\[1];
+
+&nbsp;       document.getElementById('photo').src = ev.target.result;
+
+&nbsp;       document.getElementById('photo').classList.remove('hidden');
+
+&nbsp;       document.getElementById('analyzeBtn').disabled = false;
+
+&nbsp;       document.getElementById('results').classList.add('hidden');
+
+&nbsp;     };
+
+&nbsp;     reader.readAsDataURL(file);
+
+&nbsp;   });
+
+
+
+&nbsp;   async function analyze() {
+
+&nbsp;     const apiKey = localStorage.getItem('geminiKey');
+
+&nbsp;     if (!apiKey) {
+
+&nbsp;       alert('Nejdřív vlož Gemini API klíč v nastavení ⚠️');
+
+&nbsp;       toggleSettings();
+
+&nbsp;       return;
+
+&nbsp;     }
+
+&nbsp;     if (!currentBase64) return;
+
+
+
+&nbsp;     const btn = document.getElementById('analyzeBtn');
+
+&nbsp;     btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Analyzuji...`;
+
+&nbsp;     btn.disabled = true;
+
+
+
+&nbsp;     const prompt = `Jsi profesionální nutriční specialista. Analyzuj přesně jídlo na fotce.
+
+Vrať POUZE platný JSON v tomto tvaru (bez jakéhokoli dalšího textu):
+
+{
+
+&nbsp; "items": \[
+
+&nbsp;   {"name": "název jídla", "portion": "150g", "calories": 320, "protein": 25, "carbs": 30, "fat": 12}
+
+&nbsp; ],
+
+&nbsp; "totalCalories": 650,
+
+&nbsp; "summary": "Krátké hodnocení (česky)"
+
+}`;
+
+
+
+&nbsp;     try {
+
+&nbsp;       const response = await fetch(
+
+&nbsp;         `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+
+&nbsp;         {
+
+&nbsp;           method: 'POST',
+
+&nbsp;           headers: { 'Content-Type': 'application/json' },
+
+&nbsp;           body: JSON.stringify({
+
+&nbsp;             contents: \[{
+
+&nbsp;               parts: \[
+
+&nbsp;                 { text: prompt },
+
+&nbsp;                 { inlineData: { mimeType: "image/jpeg", data: currentBase64 } }
+
+&nbsp;               ]
+
+&nbsp;             }]
+
+&nbsp;           })
+
+&nbsp;         }
+
+&nbsp;       );
+
+
+
+&nbsp;       const data = await response.json();
+
+&nbsp;       const text = data.candidates\[0].content.parts\[0].text;
+
+&nbsp;       
+
+&nbsp;       // Clean JSON if needed
+
+&nbsp;       const jsonStr = text.replace(/```json|```/g, '').trim();
+
+&nbsp;       currentResult = JSON.parse(jsonStr);
+
+
+
+&nbsp;       showResults();
+
+&nbsp;     } catch (err) {
+
+&nbsp;       alert('Chyba: ' + err.message + '\\nZkontroluj API klíč nebo internet.');
+
+&nbsp;     }
+
+
+
+&nbsp;     btn.innerHTML = `<i class="fas fa-wand-magic-sparkles"></i> Analyzovat jídlo`;
+
+&nbsp;     btn.disabled = false;
+
+&nbsp;   }
+
+
+
+&nbsp;   function showResults() {
+
+&nbsp;     const container = document.getElementById('items');
+
+&nbsp;     container.innerHTML = '';
+
+
+
+&nbsp;     currentResult.items.forEach(item => {
+
+&nbsp;       container.innerHTML += `
+
+&nbsp;         <div class="bg-zinc-800 rounded-2xl p-4 flex justify-between">
+
+&nbsp;           <div>
+
+&nbsp;             <div class="font-medium">${item.name}</div>
+
+&nbsp;             <div class="text-sm text-zinc-400">${item.portion}</div>
+
+&nbsp;           </div>
+
+&nbsp;           <div class="text-right">
+
+&nbsp;             <div class="text-emerald-400 font-bold">${item.calories} kcal</div>
+
+&nbsp;             <div class="text-xs text-zinc-500">${item.protein}p • ${item.carbs}s • ${item.fat}t</div>
+
+&nbsp;           </div>
+
+&nbsp;         </div>`;
+
+&nbsp;     });
+
+
+
+&nbsp;     document.getElementById('totalCal').textContent = currentResult.totalCalories + ' kcal';
+
+&nbsp;     document.getElementById('results').classList.remove('hidden');
+
+&nbsp;   }
+
+
+
+&nbsp;   function logMeal() {
+
+&nbsp;     let history = JSON.parse(localStorage.getItem('mealHistory') || '\[]');
+
+&nbsp;     const today = new Date().toISOString().split('T')\[0];
+
+&nbsp;     
+
+&nbsp;     history.unshift({
+
+&nbsp;       date: today,
+
+&nbsp;       time: new Date().toLocaleTimeString('cs-CZ', {hour:'2-digit', minute:'2-digit'}),
+
+&nbsp;       total: currentResult.totalCalories,
+
+&nbsp;       items: currentResult.items
+
+&nbsp;     });
+
+
+
+&nbsp;     localStorage.setItem('mealHistory', JSON.stringify(history.slice(0, 20)));
+
+&nbsp;     renderHistory();
+
+&nbsp;     alert('Jídlo zapsáno! 🎉');
+
+&nbsp;     document.getElementById('results').classList.add('hidden');
+
+&nbsp;   }
+
+
+
+&nbsp;   function renderHistory() {
+
+&nbsp;     const container = document.getElementById('history');
+
+&nbsp;     const history = JSON.parse(localStorage.getItem('mealHistory') || '\[]');
+
+&nbsp;     container.innerHTML = '';
+
+
+
+&nbsp;     if (history.length === 0) {
+
+&nbsp;       container.innerHTML = `<p class="text-zinc-500 text-center py-8">Zatím žádná jídla dnes</p>`;
+
+&nbsp;       return;
+
+&nbsp;     }
+
+
+
+&nbsp;     let totalToday = 0;
+
+&nbsp;     history.forEach(entry => {
+
+&nbsp;       totalToday += entry.total;
+
+&nbsp;       container.innerHTML += `
+
+&nbsp;         <div class="bg-zinc-900 rounded-2xl p-4 flex justify-between items-center">
+
+&nbsp;           <div>
+
+&nbsp;             <div class="text-sm text-zinc-400">${entry.time}</div>
+
+&nbsp;             <div class="font-medium">${entry.items.map(i => i.name).join(', ')}</div>
+
+&nbsp;           </div>
+
+&nbsp;           <div class="text-right font-bold text-emerald-400">${entry.total} kcal</div>
+
+&nbsp;         </div>`;
+
+&nbsp;     });
+
+
+
+&nbsp;     // Daily total at top
+
+&nbsp;     document.querySelector('#history').parentElement.querySelector('h2').innerHTML = 
+
+&nbsp;       `Dnešní příjem <span class="text-emerald-400 text-xl">(${totalToday} kcal)</span>`;
+
+&nbsp;   }
+
+
+
+&nbsp;   function saveApiKey() {
+
+&nbsp;     const key = document.getElementById('apiKey').value.trim();
+
+&nbsp;     if (key) {
+
+&nbsp;       localStorage.setItem('geminiKey', key);
+
+&nbsp;       alert('Klíč uložen ✓');
+
+&nbsp;       toggleSettings();
+
+&nbsp;     }
+
+&nbsp;   }
+
+
+
+&nbsp;   function toggleSettings() {
+
+&nbsp;     document.getElementById('settings').classList.toggle('hidden');
+
+&nbsp;     document.getElementById('apiKey').value = localStorage.getItem('geminiKey') || '';
+
+&nbsp;   }
+
+
+
+&nbsp;   // Init
+
+&nbsp;   initTailwind();
+
+&nbsp;   renderHistory();
+
+&nbsp; </script>
+
+</body>
+
+</html>
+
