@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Kalorie AI v2</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+  <style>body { font-family: system-ui, -apple-system, sans-serif; }</style>
+</head>
+<body class="bg-zinc-950 text-white min-h-screen">
+  <div class="max-w-xl mx-auto p-4">
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-3xl font-bold text-emerald-400">🍽️ Kalorie AI v2</h1>
+      <button onclick="toggleSettings()" class="text-2xl"><i class="fas fa-cog"></i></button>
+    </div>
+
+    <!-- WARNING pro file:// -->
+    <div id="warning" class="hidden bg-red-900 border border-red-600 text-red-200 p-4 rounded-2xl mb-6 text-sm">
+      ⚠️ Spouštíš appku na <strong>file://</strong> protokolu!<br>
+      Otevři ji přes <strong>http://localhost</strong> (Live Server / npx serve), jinak kamera a AI nefungují.
+    </div>
+
+    <!-- settings + zbytek kódu stejný jako minule, jen změna modelu -->
+    <div id="settings" class="hidden bg-zinc-900 p-4 rounded-2xl mb-6">
+      <p class="text-sm text-zinc-400 mb-2">Gemini API klíč (2026 verze)</p>
+      <input id="apiKey" type="text" placeholder="AIzaSy..." class="w-full bg-zinc-800 p-3 rounded-xl text-sm">
+      <button onclick="saveApiKey()" class="mt-3 w-full bg-emerald-500 py-3 rounded-xl font-medium">Uložit klíč</button>
+    </div>
+
+    <div class="bg-zinc-900 rounded-3xl overflow-hidden shadow-2xl">
+      <div id="preview" class="aspect-square bg-black flex items-center justify-center relative">
+        <input type="file" id="fileInput" accept="image/*" capture="environment" class="hidden">
+        <button onclick="takePhoto()" class="camera-btn w-20 h-20 rounded-full flex items-center justify-center text-4xl shadow-xl active:scale-95 transition">
+          📸
+        </button>
+        <img id="photo" class="hidden w-full h-full object-cover">
+      </div>
+    </div>
+
+    <div class="flex gap-3 mt-4">
+      <button onclick="takePhoto()" class="flex-1 bg-zinc-800 hover:bg-zinc-700 py-4 rounded-2xl font-medium">📷 Vyfotit / Galerie</button>
+      <button onclick="analyze()" id="analyzeBtn" class="flex-1 bg-emerald-500 hover:bg-emerald-600 py-4 rounded-2xl font-medium disabled:opacity-50" disabled>✨ Analyzovat AI</button>
+    </div>
+
+    <!-- results + history zůstávají stejné jako minule -->
+
+    <script>
+      // ... celý zbytek skriptu z předchozí verze ...
+      // JEN změna modelu:
+      // ve fetch změň:
+      // `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`
+
+      // Na začátku scriptu přidej:
+      window.onload = function() {
+        if (location.protocol === 'file:') {
+          document.getElementById('warning').classList.remove('hidden');
+        }
+        renderHistory();
+      };
+    </script>
+  </div>
+</body>
+</html>
