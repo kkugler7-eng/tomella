@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SoftwareDirekt – Softwareentwicklung Wien</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080b12;
+    --surface: #0e1420;
+    --surface2: #141b2d;
+    --accent: #2563eb;
+    --accent2: #38bdf8;
+    --accent-glow: rgba(37,99,235,0.35);
+    --text: #e8ecf4;
+    --muted: #7a8499;
+    --border: rgba(255,255,255,0.07);
+    --card: rgba(14,20,32,0.85);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* NOISE OVERLAY */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.4;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 0 5%;
+    height: 68px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(8,11,18,0.85);
+    backdrop-filter: blur(18px);
+    border-bottom: 1px solid var(--border);
+    transition: all 0.3s;
+  }
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.25rem;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .logo-dot {
+    width: 8px; height: 8px;
+    background: var(--accent2);
+    border-radius: 50%;
+    display: inline-block;
+    box-shadow: 0 0 10px var(--accent2);
+    animation: pulse-dot 2s ease-in-out infinite;
+  }
+  @keyframes pulse-dot {
+    0%,100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.7); }
+  }
+  .nav-links {
+    display: flex;
+    gap: 2rem;
+    list-style: none;
+  }
+  .nav-links a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--text); }
+  .nav-cta {
+    background: var(--accent);
+    color: #fff !important;
+    padding: 0.5rem 1.25rem !important;
+    border-radius: 6px;
+    font-weight: 600 !important;
+    transition: background 0.2s, box-shadow 0.2s !important;
+    box-shadow: 0 0 0 rgba(37,99,235,0);
+  }
+  .nav-cta:hover { background: #1d4ed8 !important; box-shadow: 0 0 20px var(--accent-glow) !important; }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 120px 5% 80px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-grid-bg {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(37,99,235,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(37,99,235,0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+    z-index: 0;
+    mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 30%, transparent 100%);
+  }
+  .hero-glow {
+    position: absolute;
+    top: -200px; left: 50%;
+    transform: translateX(-50%);
+    width: 900px; height: 700px;
+    background: radial-gradient(ellipse, rgba(37,99,235,0.18) 0%, rgba(56,189,248,0.08) 40%, transparent 70%);
+    z-index: 0;
+    pointer-events: none;
+  }
+  .hero-content { position: relative; z-index: 1; max-width: 1100px; }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(37,99,235,0.12);
+    border: 1px solid rgba(37,99,235,0.3);
+    color: var(--accent2);
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0.4rem 1rem;
+    border-radius: 100px;
+    margin-bottom: 2rem;
+    animation: fadeUp 0.6s ease both;
+  }
+  .badge::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--accent2);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--accent2);
+  }
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(2.8rem, 6vw, 5.5rem);
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    color: var(--text);
+    animation: fadeUp 0.7s 0.1s ease both;
+  }
+  .hero h1 em {
+    font-style: normal;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero-sub {
+    font-size: 1.15rem;
+    color: var(--muted);
+    max-width: 560px;
+    margin: 1.5rem 0 2.5rem;
+    animation: fadeUp 0.7s 0.2s ease both;
+  }
+  .hero-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    animation: fadeUp 0.7s 0.3s ease both;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+    padding: 0.875rem 2rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.2s;
+    box-shadow: 0 4px 20px rgba(37,99,235,0.3);
+    display: inline-flex; align-items: center; gap: 0.5rem;
+  }
+  .btn-primary:hover { background: #1d4ed8; box-shadow: 0 4px 30px rgba(37,99,235,0.5); transform: translateY(-1px); }
+  .btn-ghost {
+    background: transparent;
+    color: var(--text);
+    padding: 0.875rem 2rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.95rem;
+    border: 1px solid var(--border);
+    transition: all 0.2s;
+    display: inline-flex; align-items: center; gap: 0.5rem;
+  }
+  .btn-ghost:hover { border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.04); }
+  .hero-stats {
+    display: flex;
+    gap: 3rem;
+    margin-top: 5rem;
+    padding-top: 3rem;
+    border-top: 1px solid var(--border);
+    animation: fadeUp 0.7s 0.4s ease both;
+  }
+  .stat-num {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 2rem;
+    color: var(--text);
+    letter-spacing: -0.03em;
+  }
+  .stat-label { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 0.2rem; }
+
+  /* SECTION COMMON */
+  section { padding: 100px 5%; position: relative; }
+  .section-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent2);
+    margin-bottom: 1rem;
+    display: flex; align-items: center; gap: 0.75rem;
+  }
+  .section-label::before {
+    content: '';
+    display: inline-block;
+    width: 24px; height: 2px;
+    background: var(--accent2);
+  }
+  h2.section-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: clamp(1.9rem, 4vw, 3rem);
+    line-height: 1.15;
+    letter-spacing: -0.025em;
+    color: var(--text);
+    margin-bottom: 1.25rem;
+  }
+  .section-desc { color: var(--muted); max-width: 560px; font-size: 1.05rem; }
+
+  /* SERVICES */
+  .services { background: var(--bg); }
+  .services-intro { max-width: 1200px; margin: 0 auto 4rem; }
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 1.5px;
+    max-width: 1200px;
+    margin: 0 auto;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  .service-card {
+    background: var(--surface);
+    padding: 2.5rem;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.3s;
+    cursor: default;
+  }
+  .service-card:hover { background: var(--surface2); }
+  .service-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .service-card:hover::before { opacity: 1; }
+  .service-icon {
+    width: 48px; height: 48px;
+    background: rgba(37,99,235,0.1);
+    border: 1px solid rgba(37,99,235,0.2);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem;
+    margin-bottom: 1.5rem;
+    transition: all 0.3s;
+  }
+  .service-card:hover .service-icon { background: rgba(37,99,235,0.2); box-shadow: 0 0 20px rgba(37,99,235,0.2); }
+  .service-card h3 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1.15rem;
+    margin-bottom: 0.75rem;
+    letter-spacing: -0.01em;
+  }
+  .service-card p { color: var(--muted); font-size: 0.9rem; line-height: 1.65; }
+  .service-tags {
+    margin-top: 1.25rem;
+    display: flex; flex-wrap: wrap; gap: 0.4rem;
+  }
+  .tag {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 0.25rem 0.7rem;
+    border-radius: 4px;
+    background: rgba(56,189,248,0.08);
+    color: var(--accent2);
+    border: 1px solid rgba(56,189,248,0.15);
+  }
+
+  /* PROCESS */
+  .process { background: var(--surface); }
+  .process-inner { max-width: 1200px; margin: 0 auto; }
+  .process-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 2rem;
+    margin-top: 4rem;
+  }
+  .process-step {
+    position: relative;
+    padding: 2.5rem;
+    background: var(--bg);
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    transition: border-color 0.3s, transform 0.3s;
+  }
+  .process-step:hover { border-color: rgba(37,99,235,0.3); transform: translateY(-4px); }
+  .step-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 3.5rem;
+    font-weight: 800;
+    color: rgba(37,99,235,0.12);
+    letter-spacing: -0.04em;
+    line-height: 1;
+    margin-bottom: 1.25rem;
+    transition: color 0.3s;
+  }
+  .process-step:hover .step-num { color: rgba(37,99,235,0.25); }
+  .process-step h3 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin-bottom: 0.75rem;
+  }
+  .process-step p { color: var(--muted); font-size: 0.9rem; }
+
+  /* PROJECTS */
+  .projects { background: var(--bg); }
+  .projects-inner { max-width: 1200px; margin: 0 auto; }
+  .projects-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 3rem; gap: 2rem; }
+  .projects-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: auto auto;
+    gap: 1.5rem;
+  }
+  .project-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .project-card:hover { border-color: rgba(37,99,235,0.25); transform: translateY(-3px); box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+  .project-card.featured {
+    grid-column: span 2;
+    background: linear-gradient(135deg, rgba(37,99,235,0.12), rgba(14,20,32,0.9));
+    border-color: rgba(37,99,235,0.2);
+  }
+  .project-emoji { font-size: 2rem; margin-bottom: 1.25rem; }
+  .project-card h3 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1.15rem;
+    margin-bottom: 0.6rem;
+  }
+  .project-card p { color: var(--muted); font-size: 0.875rem; line-height: 1.65; }
+  .project-stack {
+    display: flex; gap: 0.4rem; flex-wrap: wrap;
+    margin-top: 1.25rem;
+  }
+
+  /* TESTIMONIALS */
+  .testimonials { background: var(--surface); }
+  .testimonials-inner { max-width: 1200px; margin: 0 auto; }
+  .testimonials-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-top: 3.5rem;
+  }
+  .testimonial {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    transition: all 0.3s;
+  }
+  .testimonial:hover { border-color: rgba(37,99,235,0.2); }
+  .stars { color: #fbbf24; font-size: 1rem; margin-bottom: 1rem; letter-spacing: 0.1em; }
+  .testimonial blockquote {
+    color: var(--muted);
+    font-size: 0.9rem;
+    line-height: 1.7;
+    font-style: italic;
+    margin-bottom: 1.5rem;
+  }
+  .testimonial cite {
+    font-style: normal;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .avatar {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700;
+    font-size: 0.75rem;
+    color: #fff;
+    flex-shrink: 0;
+  }
+  .cite-name { font-weight: 600; font-size: 0.875rem; color: var(--text); }
+  .cite-role { font-size: 0.75rem; color: var(--muted); }
+
+  /* CTA */
+  .cta-section {
+    background: var(--bg);
+    padding: 120px 5%;
+  }
+  .cta-inner {
+    max-width: 900px;
+    margin: 0 auto;
+    text-align: center;
+    background: linear-gradient(135deg, rgba(37,99,235,0.1), rgba(56,189,248,0.05));
+    border: 1px solid rgba(37,99,235,0.2);
+    border-radius: 24px;
+    padding: 5rem 4rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .cta-inner::before {
+    content: '';
+    position: absolute;
+    top: -100px; left: 50%;
+    transform: translateX(-50%);
+    width: 500px; height: 500px;
+    background: radial-gradient(ellipse, rgba(37,99,235,0.15), transparent 70%);
+    pointer-events: none;
+  }
+  .cta-inner h2 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(2rem, 4vw, 3.2rem);
+    letter-spacing: -0.03em;
+    margin-bottom: 1rem;
+  }
+  .cta-inner p { color: var(--muted); font-size: 1.1rem; margin-bottom: 2.5rem; }
+  .cta-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+  .cta-phone {
+    display: flex; align-items: center; gap: 0.5rem;
+    color: var(--muted);
+    font-size: 0.875rem;
+    margin-top: 1.5rem;
+  }
+  .cta-phone a { color: var(--accent2); text-decoration: none; font-weight: 600; }
+  .cta-phone a:hover { text-decoration: underline; }
+
+  /* FAQ */
+  .faq { background: var(--surface); }
+  .faq-inner { max-width: 800px; margin: 0 auto; }
+  .faq-list { margin-top: 3.5rem; }
+  .faq-item {
+    border-bottom: 1px solid var(--border);
+    padding: 1.5rem 0;
+  }
+  .faq-q {
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    user-select: none;
+    transition: color 0.2s;
+  }
+  .faq-q:hover { color: var(--accent2); }
+  .faq-q::after {
+    content: '+';
+    font-size: 1.5rem;
+    font-weight: 300;
+    color: var(--muted);
+    flex-shrink: 0;
+    transition: transform 0.3s;
+  }
+  .faq-item.open .faq-q::after { transform: rotate(45deg); }
+  .faq-a {
+    color: var(--muted);
+    font-size: 0.9rem;
+    line-height: 1.7;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease, padding 0.3s;
+  }
+  .faq-item.open .faq-a { max-height: 200px; padding-top: 1rem; }
+
+  /* FOOTER */
+  footer {
+    background: var(--bg);
+    padding: 4rem 5% 2.5rem;
+    border-top: 1px solid var(--border);
+  }
+  .footer-top {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 3rem;
+    max-width: 1200px;
+    margin: 0 auto 3rem;
+  }
+  .footer-brand p { color: var(--muted); font-size: 0.875rem; margin: 1rem 0; max-width: 300px; line-height: 1.7; }
+  .footer-contact a { display: block; color: var(--muted); text-decoration: none; font-size: 0.875rem; transition: color 0.2s; margin-bottom: 0.3rem; }
+  .footer-contact a:hover { color: var(--accent2); }
+  .footer-col h4 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+    font-size: 0.875rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--text);
+    margin-bottom: 1.25rem;
+  }
+  .footer-col ul { list-style: none; }
+  .footer-col li { margin-bottom: 0.5rem; }
+  .footer-col a { color: var(--muted); text-decoration: none; font-size: 0.875rem; transition: color 0.2s; }
+  .footer-col a:hover { color: var(--text); }
+  .footer-bottom {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    color: var(--muted);
+    font-size: 0.8rem;
+  }
+  .footer-bottom-links { display: flex; gap: 1.5rem; }
+  .footer-bottom-links a { color: var(--muted); text-decoration: none; transition: color 0.2s; }
+  .footer-bottom-links a:hover { color: var(--text); }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* MOBILE */
+  @media (max-width: 900px) {
+    .nav-links { display: none; }
+    .process-grid { grid-template-columns: 1fr; }
+    .projects-grid { grid-template-columns: 1fr; }
+    .project-card.featured { grid-column: span 1; }
+    .testimonials-grid { grid-template-columns: 1fr; }
+    .footer-top { grid-template-columns: 1fr 1fr; }
+    .hero-stats { flex-wrap: wrap; gap: 1.5rem; }
+    .cta-inner { padding: 3rem 2rem; }
+  }
+  @media (max-width: 600px) {
+    .footer-top { grid-template-columns: 1fr; }
+    .services-grid { grid-template-columns: 1fr; }
+    .projects-header { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="logo">
+    Software<span style="color:var(--accent2)">Direkt</span>
+    <span class="logo-dot"></span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#services">Services</a></li>
+    <li><a href="#projekte">Projekte</a></li>
+    <li><a href="#prozess">Prozess</a></li>
+    <li><a href="#faq">FAQ</a></li>
+    <li><a href="#kontakt" class="nav-cta">Kontakt</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-grid-bg"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-content">
+    <div class="badge">Baden bei Wien · Softwareentwicklung seit 2015</div>
+    <h1>Digitale Lösungen,<br>die Ihr Business<br><em>voranbringen.</em></h1>
+    <p class="hero-sub">Individuelle Software, Web & App-Entwicklung für Unternehmen jeder Größe. Agil, transparent und direkt – von Österreichs Spezialisten für Digitalisierung.</p>
+    <div class="hero-actions">
+      <a href="#kontakt" class="btn-primary">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81a19.79 19.79 0 01-3.07-8.68A2 2 0 012 .9h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 8.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 15.92z"/></svg>
+        Angebot anfordern
+      </a>
+      <a href="#projekte" class="btn-ghost">
+        Projekte ansehen
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
+    </div>
+    <div class="hero-stats">
+      <div>
+        <div class="stat-num">100+</div>
+        <div class="stat-label">Projekte realisiert</div>
+      </div>
+      <div>
+        <div class="stat-num">10+</div>
+        <div class="stat-label">Jahre Erfahrung</div>
+      </div>
+      <div>
+        <div class="stat-num">99.9%</div>
+        <div class="stat-label">Hosting-Verfügbarkeit</div>
+      </div>
+      <div>
+        <div class="stat-num">24h</div>
+        <div class="stat-label">Reaktionszeit</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section class="services" id="services">
+  <div class="services-intro reveal">
+    <div class="section-label">Unsere Leistungen</div>
+    <h2 class="section-title">Was wir für Sie entwickeln</h2>
+    <p class="section-desc">Maßgeschneiderte IT-Lösungen, persönlich betreut und stets kurzfristig verfügbar – von Beratung bis Go-live.</p>
+  </div>
+  <div class="services-grid reveal">
+    <div class="service-card">
+      <div class="service-icon">⚙️</div>
+      <h3>Softwareentwicklung</h3>
+      <p>Skalierbare, robuste Softwarelösungen mit modernstem Tech-Stack. Von CRM/ERP-Systemen bis zur individuellen Business-Anwendung.</p>
+      <div class="service-tags"><span class="tag">PHP 8+</span><span class="tag">MySQL</span><span class="tag">API</span><span class="tag">Cloud</span></div>
+    </div>
+    <div class="service-card">
+      <div class="service-icon">🌐</div>
+      <h3>Webentwicklung & Design</h3>
+      <p>Professionelle Websites und Onlineshops – responsiv, SEO-optimiert und für jedes Gerät perfekt dargestellt.</p>
+      <div class="service-tags"><span class="tag">HTML5</span><span class="tag">CSS3</span><span class="tag">E-Commerce</span><span class="tag">SEO</span></div>
+    </div>
+    <div class="service-card">
+      <div class="service-icon">📱</div>
+      <h3>Mobile App Entwicklung</h3>
+      <p>Native und plattformübergreifende Apps für iOS und Android – leistungsstark, modern und intuitiv bedienbar.</p>
+      <div class="service-tags"><span class="tag">Swift</span><span class="tag">Kotlin</span><span class="tag">Flutter</span><span class="tag">React Native</span></div>
+    </div>
+    <div class="service-card">
+      <div class="service-icon">🔌</div>
+      <h3>APIs & Integrationen</h3>
+      <p>Nahtlose Anbindung bestehender Systeme und Drittanbieter. RESTful APIs, Webhooks, Zahlungsschnittstellen und mehr.</p>
+      <div class="service-tags"><span class="tag">REST</span><span class="tag">Webhook</span><span class="tag">OAuth</span></div>
+    </div>
+    <div class="service-card">
+      <div class="service-icon">🔍</div>
+      <h3>SEO & Online-Marketing</h3>
+      <p>Mehr Sichtbarkeit bei Google durch technische und inhaltliche Optimierung – messbar, nachhaltig und zielgerichtet.</p>
+      <div class="service-tags"><span class="tag">SEO</span><span class="tag">SEA</span><span class="tag">Analytics</span></div>
+    </div>
+    <div class="service-card">
+      <div class="service-icon">☁️</div>
+      <h3>Hosting & Infrastruktur</h3>
+      <p>Sichere, schnelle Server zu fairen Preisen. Skalierbare Cloud-Lösungen mit 99,9% Uptime-Garantie aus Österreich.</p>
+      <div class="service-tags"><span class="tag">Cloud</span><span class="tag">SSL</span><span class="tag">Backup</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- PROJECTS -->
+<section class="projects" id="projekte">
+  <div class="projects-inner">
+    <div class="projects-header reveal">
+      <div>
+        <div class="section-label">Referenzen</div>
+        <h2 class="section-title">Ausgewählte Projekte</h2>
+      </div>
+      <p class="section-desc" style="max-width:380px;">Jedes Projekt steht für innovative Lösungen und individuelle Ergebnisse – exakt auf Ihre Anforderungen zugeschnitten.</p>
+    </div>
+    <div class="projects-grid reveal">
+      <div class="project-card featured">
+        <div class="project-emoji">🏢</div>
+        <h3>CRM & ERP System</h3>
+        <p>Umfassende Lösung zur Effizienzsteigerung und Automatisierung von Geschäftsprozessen. Mit integrierter Registrierkasse, automatischer UVA und Buchhaltungsmodul – datenschutzkonform aus Österreich.</p>
+        <div class="project-stack"><span class="tag">PHP</span><span class="tag">MySQL</span><span class="tag">API</span><span class="tag">UVA</span><span class="tag">Cloud</span></div>
+      </div>
+      <div class="project-card">
+        <div class="project-emoji">🐾</div>
+        <h3>Tierheim Software</h3>
+        <p>Professionelle Verwaltung für Tierheime – inkl. Onlinekasse und DSGVO-konform.</p>
+        <div class="project-stack"><span class="tag">PHP</span><span class="tag">DSGVO</span></div>
+      </div>
+      <div class="project-card">
+        <div class="project-emoji">🌐</div>
+        <h3>Homepages & Onlineshops</h3>
+        <p>Responsive, SEO-optimierte Websites und E-Commerce-Lösungen für verschiedenste Branchen.</p>
+        <div class="project-stack"><span class="tag">E-Commerce</span><span class="tag">SEO</span></div>
+      </div>
+      <div class="project-card">
+        <div class="project-emoji">📊</div>
+        <h3>MLM Systeme</h3>
+        <p>Optimieren und skalieren Sie Ihr Netzwerkmarketing mit unserer leistungsstarken MLM-Plattform.</p>
+        <div class="project-stack"><span class="tag">E-Commerce</span><span class="tag">Automation</span></div>
+      </div>
+      <div class="project-card">
+        <div class="project-emoji">🎨</div>
+        <h3>3D Animationen & Logos</h3>
+        <p>Professionelle Markenidentität durch kreatives Logo-Design und maßgeschneiderte Animationen.</p>
+        <div class="project-stack"><span class="tag">3D</span><span class="tag">Branding</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROCESS -->
+<section class="process" id="prozess">
+  <div class="process-inner">
+    <div class="reveal" style="text-align:center; max-width: 600px; margin: 0 auto 0;">
+      <div class="section-label" style="justify-content:center;">Unser Vorgehen</div>
+      <h2 class="section-title">Vom ersten Gespräch zum fertigen Produkt</h2>
+      <p class="section-desc" style="max-width:100%">Transparenz und persönliche Betreuung auf Augenhöhe – so entsteht Ihre professionelle Lösung.</p>
+    </div>
+    <div class="process-grid reveal">
+      <div class="process-step">
+        <div class="step-num">01</div>
+        <h3>Analyse & Beratung</h3>
+        <p>Gemeinsames Kennenlernen, Zieldefinition und strategische Planung. Unverbindliche Erstberatung inklusive.</p>
+      </div>
+      <div class="process-step">
+        <div class="step-num">02</div>
+        <h3>Agile Entwicklung</h3>
+        <p>Iterative Entwicklung mit regelmäßiger Abstimmung, transparenter Kommunikation und schnellen Teilergebnissen.</p>
+      </div>
+      <div class="process-step">
+        <div class="step-num">03</div>
+        <h3>Go-live & Support</h3>
+        <p>Reibungslose Live-Schaltung, laufende Betreuung und persönlicher Support für nachhaltigen Erfolg.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testimonials">
+  <div class="testimonials-inner">
+    <div class="reveal" style="text-align:center;">
+      <div class="section-label" style="justify-content:center;">Kundenstimmen</div>
+      <h2 class="section-title">Was unsere Kunden sagen</h2>
+    </div>
+    <div class="testimonials-grid reveal">
+      <div class="testimonial">
+        <div class="stars">★★★★★</div>
+        <blockquote>„Top Service, kompetente Umsetzung und schneller Support. Unsere digitale Transformation hat sich wirklich gelohnt!"</blockquote>
+        <cite>
+          <div class="avatar">SM</div>
+          <div>
+            <div class="cite-name">Mag. Sabine Müller</div>
+            <div class="cite-role">CEO, TrendTech GmbH</div>
+          </div>
+        </cite>
+      </div>
+      <div class="testimonial">
+        <div class="stars">★★★★★</div>
+        <blockquote>„Die SoftwareDirekt-Lösungen haben unsere Prozesse messbar optimiert. Wir sind rundum zufrieden mit dem Ergebnis!"</blockquote>
+        <cite>
+          <div class="avatar">MS</div>
+          <div>
+            <div class="cite-name">Ing. Markus Schmidt</div>
+            <div class="cite-role">IT-Leitung, Baufirma Wien</div>
+          </div>
+        </cite>
+      </div>
+      <div class="testimonial">
+        <div class="stars">★★★★★</div>
+        <blockquote>„100% Weiterempfehlung – persönliche Beratung, innovative Lösungen und faire Preise. Einfach ein verlässlicher Partner."</blockquote>
+        <cite>
+          <div class="avatar">PL</div>
+          <div>
+            <div class="cite-name">Petra Leitner</div>
+            <div class="cite-role">Inhaberin, KMU Wien</div>
+          </div>
+        </cite>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq" id="faq">
+  <div class="faq-inner">
+    <div class="reveal" style="text-align:center;">
+      <div class="section-label" style="justify-content:center;">FAQ</div>
+      <h2 class="section-title">Häufige Fragen</h2>
+    </div>
+    <div class="faq-list reveal">
+      <div class="faq-item">
+        <div class="faq-q">Wie läuft ein Softwareprojekt bei SoftwareDirekt ab?</div>
+        <div class="faq-a">Von der Erstberatung bis zum Go-live begleiten wir Sie durch Konzeption, Entwicklung, Testing und laufende Betreuung – immer persönlich und transparent.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Welche Technologien setzen Sie ein?</div>
+        <div class="faq-a">Wir arbeiten mit aktuellen Standards: PHP 8+, HTML5/CSS3, JavaScript, Bootstrap 5, GSAP, Swift, Kotlin, Flutter und React Native – für skalierbare, sichere und performante Lösungen.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Was kostet eine individuelle Softwarelösung?</div>
+        <div class="faq-a">Die Kosten richten sich nach Aufwand und Anforderungen. Fordern Sie ein kostenloses Angebot an – wir beraten ehrlich und transparent ohne versteckte Kosten.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Welche App-Technologien nutzen Sie?</div>
+        <div class="faq-a">Wir entwickeln native Apps mit Swift (iOS) und Kotlin (Android) sowie plattformübergreifende Lösungen mit Flutter und React Native – für maximale Performance und modernes Design.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Bieten Sie auch laufende Wartung und Support an?</div>
+        <div class="faq-a">Ja, wir begleiten Sie auch nach dem Go-live mit Wartungsverträgen, Updates und persönlichem Support – damit Ihre Lösung dauerhaft zuverlässig läuft.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section" id="kontakt">
+  <div class="cta-inner reveal">
+    <div class="section-label" style="justify-content:center; margin-bottom: 1.5rem;">Unverbindlich anfragen</div>
+    <h2>Bereit für den<br>nächsten Schritt?</h2>
+    <p>Lassen Sie sich unverbindlich beraten – wir entwickeln digitale Lösungen, die Ihr Business nach vorne bringen. Schnell. Persönlich. Individuell.</p>
+    <div class="cta-actions">
+      <a href="mailto:office@softwaredirekt.at" class="btn-primary">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        Angebot per Mail
+      </a>
+      <a href="tel:+436606448088" class="btn-ghost">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81a19.79 19.79 0 01-3.07-8.68A2 2 0 012 .9h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 8.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 15.92z"/></svg>
+        +43 660 644 80 88
+      </a>
+    </div>
+    <div class="cta-phone">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      Mo–Fr 08:00–16:00 Uhr &nbsp;·&nbsp; <a href="tel:+436606448088">+43 660 644 80 88</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-top">
+    <div class="footer-brand">
+      <a href="#" class="logo" style="font-size:1.1rem;">Software<span style="color:var(--accent2)">Direkt</span> <span class="logo-dot"></span></a>
+      <p>Ihre Softwareentwicklung Agentur in Baden bei Wien. Individuelle IT-Lösungen für Unternehmen jeder Größe – agil, persönlich, direkt.</p>
+      <div class="footer-contact">
+        <a href="tel:+436606448088">📞 +43 660 644 80 88</a>
+        <a href="mailto:office@softwaredirekt.at">✉ office@softwaredirekt.at</a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>Services</h4>
+      <ul>
+        <li><a href="#">Softwareentwicklung</a></li>
+        <li><a href="#">Webentwicklung</a></li>
+        <li><a href="#">Mobile Apps</a></li>
+        <li><a href="#">SEO & SEA</a></li>
+        <li><a href="#">Hosting</a></li>
+        <li><a href="#">APIs</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Referenzen</h4>
+      <ul>
+        <li><a href="#">Homepages</a></li>
+        <li><a href="#">Tierheim Software</a></li>
+        <li><a href="#">Tierpension Software</a></li>
+        <li><a href="#">ERP & CRM</a></li>
+        <li><a href="#">MLM Systeme</a></li>
+        <li><a href="#">Animationen</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Unternehmen</h4>
+      <ul>
+        <li><a href="#">Über uns</a></li>
+        <li><a href="#">Blog</a></li>
+        <li><a href="#">Kontakt</a></li>
+        <li><a href="#">AGBs</a></li>
+        <li><a href="#">Impressum</a></li>
+        <li><a href="#">Datenschutz</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2025 SoftwareDirekt OG – Alle Rechte vorbehalten.</span>
+    <div class="footer-bottom-links">
+      <a href="#">Impressum</a>
+      <a href="#">Datenschutz</a>
+      <a href="#">AGBs</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Intersection observer for reveal animations
+  const revealEls = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => entry.target.classList.add('visible'), 80);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  revealEls.forEach(el => observer.observe(el));
+
+  // FAQ accordion
+  document.querySelectorAll('.faq-q').forEach(q => {
+    q.addEventListener('click', () => {
+      const item = q.parentElement;
+      const isOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+      if (!isOpen) item.classList.add('open');
+    });
+  });
+
+  // Stagger children of grids
+  document.querySelectorAll('.services-grid, .projects-grid, .testimonials-grid, .process-grid').forEach(grid => {
+    Array.from(grid.children).forEach((child, i) => {
+      child.style.transitionDelay = `${i * 80}ms`;
+    });
+  });
+</script>
+</body>
+</html>
